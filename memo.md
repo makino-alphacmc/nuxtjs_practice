@@ -1,82 +1,170 @@
-## 🕒 Nuxt3 エンジニア完全スキルパック（優先度付き 100% 実務対応）
+優先度 1: Nuxt 基礎（根幹）
 
-> Nuxt3 実務スキルを「1 トピック = 実務で使える単位」に分割。  
-> 各トピックは **目的 / 触る場所 / 手順（例） / DoD（完了条件）** で構成。  
-> すべて **Nuxt3（＋Vue3 + SSR）前提**。
+⸻
 
----
+### T1. Composition API（Vue3 基本構文・完全版）
+	•	目的: Nuxt3 の 90% を支える Vue3 の基礎を実務レベルで扱えるようにする
+	•	触る場所: <script setup>, components, composables
+	•	手順（例）: ref → reactive → computed → watch → onMounted（＋ props/emit、composables まで）
 
-## 🥇 優先度 1: Nuxt 基礎（根幹）
+⸻
 
-### T1. Composition API（Vue3 基本構文）
+🔶 T1-1: 基本リアクティブ
+	•	ref()
+	•	reactive()
+	•	computed()
+	•	toRef()
+	•	toRefs()
+	•	shallowRef()
+	•	readonly()
+	•	理解必須: ref と reactive の違い、computed のキャッシュ
 
-- **目的**: Nuxt3 の 90% を支える Vue3 の基礎
-- **触る場所**: `<script setup>`, composables, components
-- **手順（例）**: ref → reactive → computed → watch → onMounted
-- **DoD**: “状態管理 + 画面反映 + 副作用”を説明し実装できる
+⸻
 
----
+🔶 T1-2: 副作用（watch 系）
+	•	watch()
+	•	watchEffect()
+	•	{ immediate: true }
+	•	{ deep: true }
+	•	{ once: true }
+	•	使用例: 検索フィルタ、クエリ同期、フォーム変更検知
+
+⸻
+
+🔶 T1-3: ライフサイクル
+	•	onMounted
+	•	onUnmounted
+	•	onBeforeMount
+	•	onUpdated
+	•	onBeforeUnmount
+	•	onErrorCaptured
+	•	nextTick
+	•	SSR注意: SSR では onMounted は実行されない
+
+⸻
+
+🔶 T1-4: テンプレート構文
+	•	v-model
+	•	v-if / v-show
+	•	v-for
+	•	:class / :style
+	•	@click / @submit.prevent
+
+⸻
+
+🔶 T1-5: props / emit（親子通信）
+	•	defineProps
+	•	defineEmits
+	•	props の型定義
+	•	emit の型定義
+	•	イベント名: 'update:modelValue' など
+
+⸻
+
+🔶 T1-6: script setup 構文
+	•	import 自動化
+	•	props / emit のスコープ
+	•	composables との連携
+
+⸻
+
+🔶 T1-7: composables（useXxx 抽象化）
+	•	composables/useXxx.ts
+	•	共通ロジックの切り出し
+	•	状態共有
+	•	composable 内の ref / watch / computed
+
+⸻
+
+🔶 T1-8: TypeScript（最低限）
+	•	props の型
+	•	emit の型
+	•	ref の型（ref<string>('') 等）
+	•	API レスポンス型
+
+⸻
+
+🔶 T1-9: 非同期処理
+	•	async/await
+	•	loading 状態管理
+	•	非同期結果を reactive に保持
+
+⸻
+
+🔶 T1-10: イベント操作
+	•	@click
+	•	@change
+	•	@submit
+	•	.prevent
+	•	.stop
+
+⸻
+
+DoD（完了条件）
+	•	ref/reactive/computed の違いを説明できる
+	•	watch / watchEffect を適切に使い分けられる
+	•	SSR/CSR のライフサイクル差を正確に説明できる
+	•	props/emit を使って親子コンポーネントを構築できる
+	•	composable に共通ロジックを切り出せる
+	•	型定義を最低限扱えてバグを回避できる
+	•	async/await を使った UI 状態管理ができる
+	•	小規模アプリ（カウンター／モーダル／フォーム）が作れる
+
+⸻
 
 ### T2. Nuxt プロジェクト構造
+	•	目的: Nuxt アプリの骨格理解（pages/layouts/composables）
+	•	触る場所: pages/, layouts/, components/, app.vue
+	•	手順（例）: pages 自動ルーティング → layout 切替 → component 読込
+	•	DoD: 画面遷移 + 個別レイアウト + グローバル部品を作れる
 
-- **目的**: Nuxt アプリの骨格理解（pages/layouts/composables）
-- **触る場所**: `pages/`, `layouts/`, `components/`, `app.vue`
-- **手順（例）**: pages 自動ルーティング → layout 切替 → component 読込
-- **DoD**: 画面遷移 + 個別レイアウト + グローバル部品を作れる
-
----
+⸻
 
 ### T3. SSR / CSR / Hydration 理解
+	•	目的: Nuxt 特有の“どこでコードが動くか”を理解
+	•	触る場所: server/api, onMounted, useFetch
+	•	手順（例）: console.log で SSR/CSR の差分確認
+	•	DoD: SSR / CSR の切り分け説明＋誤動作なくコード配置できる
 
-- **目的**: Nuxt 特有の“どこでコードが動くか”を理解
-- **触る場所**: server/api, onMounted, useFetch
-- **手順（例）**: console.log で SSR/CSR の差分確認
-- **DoD**: SSR / CSR の切り分け説明＋誤動作なくコード配置できる
-
----
+⸻
 
 ### T4. useFetch / useAsyncData（データ取得コア）
+	•	目的: API 取得・リロード・エラーハンドリング
+	•	触る場所: 各ページの <script setup>, composables
+	•	手順（例）: useFetch → POST/GET → キャッシュ key → transform
+	•	DoD: GET/POST/更新/ステータス/エラーまで網羅して使える
 
-- **目的**: API 取得・リロード・エラーハンドリング
-- **触る場所**: 各ページの `<script setup>`, composables
-- **手順（例）**: useFetch → POST/GET → キャッシュ key → transform
-- **DoD**: GET/POST/更新/ステータス/エラーまで網羅して使える
-
----
+⸻
 
 ### T5. ルーティング（useRoute / useRouter）
+	•	目的: 動的ルート・クエリ・遷移制御
+	•	触る場所: pages/[id].vue, pages/index.vue
+	•	手順（例）: useRoute().params.id → useRouter().push()
+	•	DoD: クエリ同期 + 動的遷移が実務レベルで書ける
 
-- **目的**: 動的ルート・クエリ・遷移制御
-- **触る場所**: `pages/[id].vue`, `pages/index.vue`
-- **手順（例）**: useRoute().params.id → useRouter().push()
-- **DoD**: クエリ同期 + 動的遷移が実務レベルで書ける
-
----
+⸻
 
 ### T6. Middleware（認証・アクセス制御）
+	•	目的: 認証チェック・権限ルート制御
+	•	触る場所: middleware/auth.global.ts, middleware/auth.ts
+	•	手順（例）: 未ログイン → redirect(’/login’)
+	•	DoD: 認証必須ページを確実に保護できる
 
-- **目的**: 認証チェック・権限ルート制御
-- **触る場所**: `middleware/auth.global.ts`, `middleware/auth.ts`
-- **手順（例）**: 未ログイン → redirect('/login')
-- **DoD**: 認証必須ページを確実に保護できる
-
----
+⸻
 
 ### T7. useState（Nuxt 独自のグローバル状態）
+	•	目的: 認証状態・ユーザー情報の保持
+	•	触る場所: composables, middleware
+	•	手順（例）: useState(“user”) → ログイン後セット
+	•	DoD: SSR/CSR どちらでもブレない状態管理ができる
 
-- **目的**: 認証状態・ユーザー情報の保持
-- **触る場所**: composables, middleware
-- **手順（例）**: useState("user") → ログイン後セット
-- **DoD**: SSR/CSR どちらでもブレない状態管理ができる
-
----
+⸻
 
 ### T8. server/api（バックエンドロジック）
-
-- **目的**: API 実装・モック作成・外部API連携
-- **触る場所**: `server/api/*.ts`
-- **手順（例）**: defineEventHandler → getQuery → readBody
-- **DoD**: CRUD API / 外部API 取得 / バリデーションが作れる
+	•	目的: API 実装・モック作成・外部API連携
+	•	触る場所: server/api/*.ts
+	•	手順（例）: defineEventHandler → getQuery → readBody
+	•	DoD: CRUD API / 外部API 取得 / バリデーションが作れる
 
 ---
 
