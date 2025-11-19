@@ -1,180 +1,155 @@
-# Nuxt3 学習支援 AI メモ（外部 REST API 版 / JSONPlaceholder 利用）
+# ============================================================
+#  Nuxt3 学習支援 AI メモ
+#  Webエンジニア基礎スキル版（REST / フォーム / 認証 / 日付 / 状態管理）
+# ============================================================
 
-## 🎯 基本設定
+# ------------------------------------------------------------
+# 🎯 基本設定
+# ------------------------------------------------------------
 
-### 技術スタック
+技術スタック:
+  - Vue 3 + TypeScript + Nuxt 3（最新）
+  - UI: Nuxt UI（または shadcn-vue 相当）+ Tailwind CSS
+  - DB（サーバー学習用）: Prisma + SQLite
+  - 外部 REST API: JSONPlaceholder
+      https://jsonplaceholder.typicode.com/
+  - 実行環境: Cursor
+  - 作業場所: practice フォルダ（Nuxt プロジェクト）
 
-- **Vue 3 + TypeScript + Nuxt 3（最新）**
-- **UI**: Nuxt UI（または shadcn-vue 相当）+ Tailwind CSS  
-- **DB**: Prisma + SQLite（ローカル開発用）  
-- **外部 API（REST）**: **JSONPlaceholder**  
-  - https://jsonplaceholder.typicode.com/
-- **実行環境**: Cursor（ローカル開発）
-- **作業場所**: `practice` フォルダ内（Nuxt プロジェクト）
+学習方針（Webエンジニア基礎対応版）:
+  - 1課題 = 15分のミニタスク
+  - 必ず Nuxt3 の最新機能を使う:
+      <script setup>
+      useFetch / useAsyncData
+      useRoute / useRouter
+      useState（状態管理）
+      middleware
+      composables
+  - 各課題で必ず以下のどれかの基礎を鍛える:
+      非同期処理, API 連携, 配列操作, CRUD,
+      フォーム, バリデーション,
+      状態管理, 日付処理,
+      エラーハンドリング,
+      デバウンス/スロットル,
+      認証（疑似）, ルーティング, Web Storage
+  - JSONPlaceholder で CRUD 練習
+  - Prisma は server/api の練習時のみ使用
 
-### 学習方針（REST API 対応版）
+重要な概念:
+  - useFetch の SSR / CSR 挙動
+      SSR = サーバーで API を叩く
+      CSR = ページ遷移後にブラウザで叩く
+  - 動的ルート / クエリ / パラメータ
+  - CORS / フェッチタイミング
+  - API レスポンスの型付けは type を基本
+  - DB（Prisma）は server/api 内だけで使用し混在禁止
 
-- **1 課題 = 15 分**の「最小」タスク
-- 必ず **Nuxt3 の最新機能**を使う  
-  - `<script setup>`
-  - `useFetch`（REST API 取得の基本）
-  - `useAsyncData`
-  - `useRoute` / `useRouter`
-  - `useState`（状態管理）
-  - `middleware`
-  - `composables`
-- **外部 API を叩く練習を最優先**  
-  → JSONPlaceholder を利用して **実際に GET / POST / PUT / DELETE を練習**  
-  → `https://jsonplaceholder.typicode.com/posts` などの REST API を取得
-- UI は **Nuxt UI + Tailwind**  
-- CSS は **テーマ変数と Tailwind 基本設定のみ**
-- **ダークテーマをベース**として UI を構築（コントラスト最適化）
-- **写経 → 自力再現 → 応用練習**の小ステップ
+# ------------------------------------------------------------
+# 🖌 共通スタイル設定（Nuxt UI + Tailwind）
+# ------------------------------------------------------------
 
-### 重要な概念（REST API 対応）
+Nuxt UI + Tailwind 方針:
+  - UI: Card / Button / Input / Textarea / Dialog / Alert
+  - Tailwind で配置と余白:
+      flex, grid, gap-4, p-4, rounded-xl, shadow
+      w-full, max-w-2xl, mx-auto, text-neutral-100
+  - ダークテーマ基準:
+      背景: bg-neutral-900
+      カード: bg-neutral-950
+      テキスト: text-neutral-100
 
-- **useFetch の SSR / CSR の挙動を理解**  
-  - SSR: サーバーで API を叩く  
-  - CSR: ページ遷移後にブラウザから API を叩く
-- **query / params を使った REST API 取得**
-- **外部 REST API の CORS / URL / fetch タイミングの理解**
-- **interface ではなく type を使用**
-- **Prisma は server/api でだけ使用**  
-  （外部 API の処理と混同しない）
+assets/css/main.css 内容方針:
+  - Tailwind 読み込み
+  - ダークテーマ CSS 変数:
+      --background
+      --foreground
+      --primary
+  - 最低限の共通スタイル（フォント、スクロールバー）
 
----
+# ------------------------------------------------------------
+# 📚 学習メソッド（3フェーズ × 各15分）
+# ------------------------------------------------------------
 
-## 🖌 共通スタイル（Nuxt UI + Tailwind）
+# ----------------------
+# Phase 1: 模写で理解
+# ----------------------
+目的:
+  Nuxt3 × Webエンジニア基礎処理を「写経で習得」。
 
-### Nuxt UI + Tailwind 使用方針
+内容:
+  - useFetch + GET 一覧表示
+  - CRUD（POST / PUT / DELETE）
+  - フォーム + バリデーション
+  - 日付フォーマット
+  - エラー表示コンポーネント
+  - デバウンス付き検索
+  - 簡易ログイン（疑似認証）
 
-- Nuxt UI のコンポーネント（Card, Button, Input etc）を基盤にする
-- レイアウトや余白調整は Tailwind で行う
-- ダークテーマを基本にして背景・テキストのコントラスト調整
-- `assets/css/main.css` は以下のみ：
-  - Tailwind の読み込み
-  - ダークテーマ変数の定義（`--background`, `--foreground`, `--primary`）
-  - 文字サイズ・スクロールバーなど最低限
+ルール:
+  - コメント付き完全コードを AI が提供
+  - 各行に理由説明
+  - 処理の流れを図解:
+      useFetch → API → JSON → 型付け → data → UI
+  - UI は Nuxt UI + Tailwind
+  - Prisma は server/api の課題の時のみ
 
----
+JSONPlaceholder（CRUD課題の例）:
+  - 投稿一覧       GET: https://jsonplaceholder.typicode.com/posts
+  - 投稿詳細       GET: https://jsonplaceholder.typicode.com/posts/1
+  - 投稿作成       POST: https://jsonplaceholder.typicode.com/posts
+  - 投稿更新       PUT: https://jsonplaceholder.typicode.com/posts/1
+  - 投稿削除       DELETE: https://jsonplaceholder.typicode.com/posts/1
 
-## 📚 学習メソッド（3 段階・各タスク 15 分）
+# ----------------------
+# Phase 2: 自力再現（ヒントのみ）
+# ----------------------
+目的:
+  「コードなしの手順」だけで自分で書ける状態にする。
 
----
+内容:
+  - AI は手順だけ提示（コードは禁止）
+  - 最初に完成UIの口頭イメージ
+  - 使用すべきUIコンポーネントを記述（Card / Button / Input）
+  - Tailwind のヒントを提示:
+      flex, gap-4, rounded-xl, shadow, max-w-2xl
+  - ダークテーマのヒントも提示:
+      bg-neutral-900, bg-neutral-950
+  - Phase1 とは別ファイル名で作成
+  - CRUD 以外の課題も追加:
+      検索フォーム（デバウンス）
+      ログインフォーム（バリデ）
+      日付ソート
+      URL クエリフィルタ
+      エラー出し分け
 
-## Phase 1: 模写で理解（外部 API 版）
+# ----------------------
+# Phase 3: 継続練習（応用・ランダム）
+# ----------------------
+目的:
+  パターンを応用し「実務脳」にする。
 
-- **JSONPlaceholder の REST API を useFetch で叩くコードを提供**
-- **コメント付きの完全コード**
-- **処理の流れ図解**
-  - `useFetch → APIリクエスト → JSONレスポンス → data に入る → UI へ表示`
-- **type 必須**
-- **UI には Nuxt UI + Tailwind**
-- **なぜその行が必要なのか必ず一言解説**
-- **ダークテーマ前提のスタイリング根拠も解説**
-- Prisma・DB 説明も行うが  
-  **REST API 取得の練習が主**
+内容:
+  - posts → users → comments → albums → todos と題材を差し替えて反復
+  - 毎回別ファイル名で履歴確保
+  - ランダム出題:
+      一覧 → 詳細 → フォーム → ページング → 絞り込み
+      お気に入り → 認証ガード → URL同期
+  - Tailwind / Nuxt UI の微調整（色・影・角丸）
+  - server/api で Proxy API 作成
+      例: /api/posts → 内部で JSONPlaceholder を叩く
+  - Prisma を使った自前 CRUD 版も追加可能
+  - 状態管理（useState）
+  - middleware（ログイン必須ページ）
+  - Web Storage（テーマ・フィルタ保持）
 
-### JSONPlaceholder API 主に使用するエンドポイント例
+# ------------------------------------------------------------
+# 🧩 このメモの目的
+# ------------------------------------------------------------
+Nuxt3 を使いながら、
+「Webエンジニアとして絶対に必要な基礎スキル」
+（非同期 / API / 配列 / CRUD / フォーム / 状態管理 / 日付 / 認証 / エラー / ルーティング）
+をすべて練習できるようにした汎用テンプレート。
 
-| 機能 | URL |
-|------|-----|
-| 投稿一覧（GET） | https://jsonplaceholder.typicode.com/posts |
-| 投稿詳細（GET） | https://jsonplaceholder.typicode.com/posts/1 |
-| 投稿作成（POST） | https://jsonplaceholder.typicode.com/posts |
-| 投稿更新（PUT） | https://jsonplaceholder.typicode.com/posts/1 |
-| 投稿削除（DELETE） | https://jsonplaceholder.typicode.com/posts/1 |
-
----
-
-## Phase 2: 自力再現（ヒント誘導）
-
-- **コードを出さず、実装手順だけを提示**
-- 1 行ずつ「次に何をするか」だけ指示
-- **完成 UI の図解を最初に提示**
-- 使用すべき UI コンポーネント（Card, Button, etc）をヒントとして提示
-- Tailwind ユーティリティもヒント付き  
-  （`flex`, `gap-4`, `rounded-xl`, `shadow`, etc）
-- ダークテーマ調整もヒント  
-  （例：背景は `bg-neutral-900`、カード `bg-neutral-950` など）
-- **必ずファイル名を Phase1 と変える**
-- **REST API のヒント（URL / メソッド）** も提示
-
----
-
-## Phase 3: 継続練習（REST API 応用）
-
-- 同じ useFetch パターンを **posts → users → comments → albums → todos** とテーマ変更して反復
-- **毎回ファイル名を変更**
-- ランダム出題（一覧 → 詳細 → フォーム → ページング → 絞り込み）
-- テーマ差分は Tailwind の差し替えと Nuxt UI 設定で表現
-- 必要に応じて server/api 側で **ProxyAPI** を作る練習  
-  （例： `/api/posts` から JSONPlaceholder を叩く）
-
----
-
-# 🔎 REST API を使ったステップ詳細
-
-## step_by_step_explanation（Phase 1）
-
-- **フロント → REST API → JSON → 表示**の最小ルートを図解  
-- `useFetch` の SSR/CSR の違いも解説
-- 使用コンポーネントの根拠説明  
-  - `Card` = POST をまとまり表示  
-  - `flex gap-4` = タイトルとメタ情報の横並び  
-  - `rounded-lg shadow` = カードの視認性UP  
-- ダークテーマの根拠説明  
-  - 背景：`bg-neutral-900`  
-  - テキスト：`text-neutral-100`  
-- JSONPlaceholder のレスポンス構造説明  
-  - `id`, `userId`, `title`, `body`
-
-## full_code_with_comment（Phase 1）
-
-- 最小限の useFetch コード  
-- Nuxt UI + Tailwind で一覧を美しく表示  
-- Prisma は必要な場合のみ（REST 練習が主）  
-- **外部 REST API（JSONPlaceholder）を叩く useFetch の実例付き**
-
-## self_challenge_instruction（Phase 2）
-
-- 実装手順を 1 行ずつ明確に提示  
-- UI コンポーネントと Tailwind のヒント追加  
-- REST API URL / メソッドだけ示す  
-- ダークテーマ最適化の指示あり  
-- 1 回目とは違うファイル名で作成
-
-## repeat_and_random_practice（Phase 3）
-
-- 他の JSONPlaceholder API へ展開  
-  - posts → comments → users → albums → todos  
-- 毎回テーマ（色・角丸・影）を変える  
-- 同じ useFetch パターンを文脈だけ変えて練習  
-- 状態管理（useState）や middleware と組み合わせる応用問題も出す
-
----
-
-# 🌐 JSONPlaceholder を使うメリット
-
-- 認証不要・無料・即レスポンス
-- 本番 REST API と同じ構造（CRUD が試せる）
-- useFetch の練習に最適
-- SSR / CSR の違いが試しやすい
-- フロント単体練習で完結する
-
----
-
-# タスク例（15 分 × REST API）
-
-| タスク | 内容 |
-|--------|-------|
-| T1 | 投稿一覧を useFetch で取得し、Card で表示する |
-| T2 | 投稿詳細（`/posts/:id`）を動的ルートで表示 |
-| T3 | GET パラメータでフィルタ（例：`?userId=1`） |
-| T4 | POST で新規投稿フォームを実装 |
-| T5 | PUT で投稿の更新フォーム |
-| T6 | DELETE で投稿削除ボタン |
-| T7 | useState で「お気に入り」機能を追加 |
-| T8 | middleware で「ログインしないと見れない画面」を模擬 |
-| T9 | server/api 経由で JSONPlaceholder を Proxy 化 |
-| T10 | 無限スクロール or ページネーション |
+# ------------------------------------------------------------
+# 🚀 コピーしてそのまま学習計画として使える
+# ============================================================
