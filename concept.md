@@ -1,155 +1,130 @@
 # ============================================================
-#  Nuxt3 学習支援 AI メモ
-#  Webエンジニア基礎スキル版（REST / フォーム / 認証 / 日付 / 状態管理）
+# Nuxt3 学習メモ（超シンプル版）
+# Webエンジニア基礎ぜんぶに効く練習用
 # ============================================================
 
+# ルール
 # ------------------------------------------------------------
-# 🎯 基本設定
+# 1回目: AI がサンプルコードを書く
+#   - npm run dev でそのまま動く
+#   - 1行ずつ「何をしているコードか」を解説してもらう
+#
+# 2回目以降: 課題モード
+#   - AI はコードではなく「やることリスト」だけ出す
+#   - 自分でコードを書く → 詰まったところだけ質問する
+
+# 技術スタック
+# ------------------------------------------------------------
+# - Nuxt 3 + Vue 3 + TypeScript
+# - UI: Nuxt UI（または類似） + Tailwind CSS
+# - 外部API: JSONPlaceholder（REST / CRUD練習用）
+# - サーバー学習: Prisma + SQLite（必要になったら）
+# - 開発環境: Cursor
+# - プロジェクト: practice フォルダ配下に Nuxt プロジェクトを作る
+
+# この練習で鍛えるスキル
+# ------------------------------------------------------------
+# Nuxt 専用ではなく、「Webエンジニアとして必須な処理」をぜんぶカバーする。
+
+# 1) 非同期処理 & API 連携
+#   - async / await
+#   - useFetch / useAsyncData
+#   - GET / POST / PUT / DELETE
+#   - SSR / CSR の違い
+
+# 2) 配列・オブジェクト操作
+#   - map / filter / reduce / find / sort
+#   - 一覧表示・検索・絞り込み・並び替え
+
+# 3) CRUD
+#   - 一覧取得（Read）
+#   - 新規作成（Create）
+#   - 更新（Update）
+#   - 削除（Delete）
+
+# 4) フォーム & バリデーション
+#   - v-model
+#   - 必須チェック / 形式チェック
+#   - 送信中状態・エラー表示
+
+# 5) 状態管理
+#   - ページ内: ref / reactive / computed
+#   - グローバル: useState（簡易 Store 的に使う）
+#   - 認証状態 / 検索条件 / UI 状態保持
+
+# 6) 日付・時刻
+#   - 日付文字列の表示整形
+#   - 何日前 / 何時間前の計算
+#   - タイムゾーンの意識
+
+# 7) エラーハンドリング
+#   - try / catch
+#   - API エラー時の UI
+#   - 404 / 500 風画面の出し分け
+
+# 8) パフォーマンス系
+#   - デバウンス: 入力の待ち
+#   - スロットル: スクロール・resize の負荷軽減
+
+# 9) ルーティング / URL
+#   - 動的ルート: /posts/[id].vue
+#   - クエリパラメータ: ?page=1&keyword=foo
+#   - URL と画面状態の同期
+
+# 10) Web Storage
+#   - localStorage / sessionStorage
+#   - テーマ / 絞り込み条件 / 設定の保存
+
+# 11) サーバー側（必要になったら）
+#   - /server/api/* で API を作る
+#   - Prisma + SQLite でシンプルな DB CRUD
+#   - 「外部 REST API」と「自前 API」を頭の中で分ける
+
+# UI スタイル方針（共通）
+# ------------------------------------------------------------
+# - Nuxt UI の Card / Button / Input などを基本に使う
+# - Tailwind でレイアウト調整:
+#     flex, grid, gap-4, p-4, rounded-xl, shadow, max-w-2xl, mx-auto
+# - ダークテーマを前提：
+#     背景: bg-neutral-900
+#     カード: bg-neutral-950
+#     文字: text-neutral-100
+# - assets/css/main.css には：
+#     Tailwind 読み込み
+#     ダークテーマ用 CSS 変数 (--background, --foreground, --primary)
+#     最低限の共通スタイルのみを書く
+
+# 学習フェーズ
 # ------------------------------------------------------------
 
-技術スタック:
-  - Vue 3 + TypeScript + Nuxt 3（最新）
-  - UI: Nuxt UI（または shadcn-vue 相当）+ Tailwind CSS
-  - DB（サーバー学習用）: Prisma + SQLite
-  - 外部 REST API: JSONPlaceholder
-      https://jsonplaceholder.typicode.com/
-  - 実行環境: Cursor
-  - 作業場所: practice フォルダ（Nuxt プロジェクト）
+# Phase 1: サンプルで理解
+#   - 1回目は AI がフルコードを書く
+#   - npm run dev で動く最小の画面
+#   - 1行ずつ意味を解説してもらう
+#   - テーマ例:
+#       投稿一覧表示（GET）
+#       投稿詳細表示（動的ルート）
+#       かんたんフォーム + POST
+#       エラー表示 / ローディング表示
 
-学習方針（Webエンジニア基礎対応版）:
-  - 1課題 = 15分のミニタスク
-  - 必ず Nuxt3 の最新機能を使う:
-      <script setup>
-      useFetch / useAsyncData
-      useRoute / useRouter
-      useState（状態管理）
-      middleware
-      composables
-  - 各課題で必ず以下のどれかの基礎を鍛える:
-      非同期処理, API 連携, 配列操作, CRUD,
-      フォーム, バリデーション,
-      状態管理, 日付処理,
-      エラーハンドリング,
-      デバウンス/スロットル,
-      認証（疑似）, ルーティング, Web Storage
-  - JSONPlaceholder で CRUD 練習
-  - Prisma は server/api の練習時のみ使用
+# Phase 2: 自力再現（ヒント付き）
+#   - AI はコードを書かない
+#   - 「ファイル名 / 何を import / どのフックを使うか」だけ指示
+#   - UI コンポーネント名と Tailwind クラスだけヒント
+#   - 例題:
+#       検索フォーム + デバウンス
+#       ログイン風フォーム（バリデーション）
+#       日付つき一覧 + ソート
+#       URL クエリでフィルタ
 
-重要な概念:
-  - useFetch の SSR / CSR 挙動
-      SSR = サーバーで API を叩く
-      CSR = ページ遷移後にブラウザで叩く
-  - 動的ルート / クエリ / パラメータ
-  - CORS / フェッチタイミング
-  - API レスポンスの型付けは type を基本
-  - DB（Prisma）は server/api 内だけで使用し混在禁止
+# Phase 3: 応用・ランダム
+#   - 題材を変えて同じパターンを使い回す:
+#       posts / users / comments / todos / albums など
+#   - 一覧 → 詳細 → 作成 → 更新 → 削除 → 絞り込み を組み合わせ
+#   - 状態管理（useState）・middleware・Web Storage と絡める
+#   - 時々 server/api + Prisma も混ぜて「本番寄り」のパターンに慣れる
 
-# ------------------------------------------------------------
-# 🖌 共通スタイル設定（Nuxt UI + Tailwind）
-# ------------------------------------------------------------
-
-Nuxt UI + Tailwind 方針:
-  - UI: Card / Button / Input / Textarea / Dialog / Alert
-  - Tailwind で配置と余白:
-      flex, grid, gap-4, p-4, rounded-xl, shadow
-      w-full, max-w-2xl, mx-auto, text-neutral-100
-  - ダークテーマ基準:
-      背景: bg-neutral-900
-      カード: bg-neutral-950
-      テキスト: text-neutral-100
-
-assets/css/main.css 内容方針:
-  - Tailwind 読み込み
-  - ダークテーマ CSS 変数:
-      --background
-      --foreground
-      --primary
-  - 最低限の共通スタイル（フォント、スクロールバー）
-
-# ------------------------------------------------------------
-# 📚 学習メソッド（3フェーズ × 各15分）
-# ------------------------------------------------------------
-
-# ----------------------
-# Phase 1: 模写で理解
-# ----------------------
-目的:
-  Nuxt3 × Webエンジニア基礎処理を「写経で習得」。
-
-内容:
-  - useFetch + GET 一覧表示
-  - CRUD（POST / PUT / DELETE）
-  - フォーム + バリデーション
-  - 日付フォーマット
-  - エラー表示コンポーネント
-  - デバウンス付き検索
-  - 簡易ログイン（疑似認証）
-
-ルール:
-  - コメント付き完全コードを AI が提供
-  - 各行に理由説明
-  - 処理の流れを図解:
-      useFetch → API → JSON → 型付け → data → UI
-  - UI は Nuxt UI + Tailwind
-  - Prisma は server/api の課題の時のみ
-
-JSONPlaceholder（CRUD課題の例）:
-  - 投稿一覧       GET: https://jsonplaceholder.typicode.com/posts
-  - 投稿詳細       GET: https://jsonplaceholder.typicode.com/posts/1
-  - 投稿作成       POST: https://jsonplaceholder.typicode.com/posts
-  - 投稿更新       PUT: https://jsonplaceholder.typicode.com/posts/1
-  - 投稿削除       DELETE: https://jsonplaceholder.typicode.com/posts/1
-
-# ----------------------
-# Phase 2: 自力再現（ヒントのみ）
-# ----------------------
-目的:
-  「コードなしの手順」だけで自分で書ける状態にする。
-
-内容:
-  - AI は手順だけ提示（コードは禁止）
-  - 最初に完成UIの口頭イメージ
-  - 使用すべきUIコンポーネントを記述（Card / Button / Input）
-  - Tailwind のヒントを提示:
-      flex, gap-4, rounded-xl, shadow, max-w-2xl
-  - ダークテーマのヒントも提示:
-      bg-neutral-900, bg-neutral-950
-  - Phase1 とは別ファイル名で作成
-  - CRUD 以外の課題も追加:
-      検索フォーム（デバウンス）
-      ログインフォーム（バリデ）
-      日付ソート
-      URL クエリフィルタ
-      エラー出し分け
-
-# ----------------------
-# Phase 3: 継続練習（応用・ランダム）
-# ----------------------
-目的:
-  パターンを応用し「実務脳」にする。
-
-内容:
-  - posts → users → comments → albums → todos と題材を差し替えて反復
-  - 毎回別ファイル名で履歴確保
-  - ランダム出題:
-      一覧 → 詳細 → フォーム → ページング → 絞り込み
-      お気に入り → 認証ガード → URL同期
-  - Tailwind / Nuxt UI の微調整（色・影・角丸）
-  - server/api で Proxy API 作成
-      例: /api/posts → 内部で JSONPlaceholder を叩く
-  - Prisma を使った自前 CRUD 版も追加可能
-  - 状態管理（useState）
-  - middleware（ログイン必須ページ）
-  - Web Storage（テーマ・フィルタ保持）
-
-# ------------------------------------------------------------
-# 🧩 このメモの目的
-# ------------------------------------------------------------
-Nuxt3 を使いながら、
-「Webエンジニアとして絶対に必要な基礎スキル」
-（非同期 / API / 配列 / CRUD / フォーム / 状態管理 / 日付 / 認証 / エラー / ルーティング）
-をすべて練習できるようにした汎用テンプレート。
-
-# ------------------------------------------------------------
-# 🚀 コピーしてそのまま学習計画として使える
+# ============================================================
+# このメモは、「次にどんな課題を AI に頼むか」を決めるための土台。
+# 例: 「Phase1の“投稿一覧表示サンプル”やって」「次はPhase2の検索フォーム課題出して」
 # ============================================================
