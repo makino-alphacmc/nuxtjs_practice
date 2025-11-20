@@ -8,6 +8,110 @@
 
 ---
 
+## 📄 ページ全体の構造（最初に実装）
+
+### 🎯 学習目標
+
+- Vue のテンプレート構造を理解する
+- Tailwind CSS の基本的なクラス名を学ぶ
+- Nuxt UI のコンポーネントの使い方を理解する
+
+### 💻 完全な実装コード
+
+```vue
+<template>
+	<!-- 
+		ページ全体のコンテナ
+		min-h-screen: 画面の最小高さを100%に設定
+		bg-neutral-900: 背景色をダークグレーに設定
+		p-8: パディング（内側の余白）を8（2rem）に設定
+	-->
+	<div class="min-h-screen bg-neutral-900 p-8">
+		<!-- 
+			コンテンツの最大幅を制限して中央寄せ
+			max-w-4xl: 最大幅を4xl（56rem）に制限
+			mx-auto: 左右のマージンを自動（中央寄せ）
+		-->
+		<div class="max-w-4xl mx-auto">
+			<!-- 
+				ページタイトル
+				text-3xl: テキストサイズを3xlに設定
+				font-bold: フォントを太字に設定
+				text-neutral-100: テキスト色をライトグレーに設定
+				mb-8: 下のマージンを8（2rem）に設定
+			-->
+			<h1 class="text-3xl font-bold text-neutral-100 mb-8">非同期処理の練習</h1>
+
+			<!-- 
+				ここに各セクションのカードを追加していきます
+				セクション1、2、3、4、5のカードを順番に追加
+			-->
+		</div>
+	</div>
+</template>
+
+<script setup lang="ts">
+// ここに各セクションのスクリプトを追加していきます
+</script>
+```
+
+### 📝 実装手順（チェックリスト）
+
+1. ✅ `pages/async-await/p2/index.vue`ファイルを作成（既に存在する場合は開く）
+
+2. ✅ `<template>`タグを追加
+
+   ```vue
+   <template></template>
+   ```
+
+3. ✅ ページ全体のコンテナを追加
+
+   ```vue
+   <div class="min-h-screen bg-neutral-900 p-8">
+   ```
+
+4. ✅ コンテンツの最大幅を制限するコンテナを追加
+
+   ```vue
+   <div class="max-w-4xl mx-auto">
+   ```
+
+5. ✅ ページタイトルを追加
+
+   ```vue
+   <h1 class="text-3xl font-bold text-neutral-100 mb-8">
+     非同期処理の練習
+   </h1>
+   ```
+
+6. ✅ `</div>`を 2 つ追加（コンテナを閉じる）
+
+   ```vue
+   </div>
+   </div>
+   ```
+
+7. ✅ `</template>`タグを追加
+
+   ```vue
+   </template>
+   ```
+
+8. ✅ `<script setup lang="ts">`タグを追加
+
+   ```vue
+   <script setup lang="ts"></script>
+   ```
+
+### 🧪 確認ポイント
+
+- [ ] ページが表示されるか？
+- [ ] タイトルが中央に表示されるか？
+- [ ] 背景色がダークグレーになっているか？
+
+---
+
 ## ✅ セクション 1: useFetch を使った基本的な API 通信
 
 ### 🎯 学習目標
@@ -186,14 +290,106 @@ const {
 
 ### 📝 実装手順（チェックリスト）
 
+#### `<script setup>`部分の実装
+
 1. ✅ `<script setup>`内に`useFetch`を記述
 
    - `pages/async-await/p2/index.vue`の`<script setup>`部分を開く
    - セクション 1 のコメント部分を見つける
    - 上記のコードをコピー＆ペースト
 
-2. ✅ テンプレート部分は既に実装済み（確認のみ）
-   - テンプレート部分は既に用意されているので、動作確認のみ
+#### `<template>`部分の実装
+
+**注意**: ページ全体の構造は、上記の「📄 ページ全体の構造（最初に実装）」セクションで既に実装済みです。ここでは、セクション 1 のカード部分のみを追加します。
+
+2. ✅ UCard コンポーネントでセクション 1 のカードを作成
+
+   ```vue
+   <UCard class="mb-6 bg-neutral-950">
+     <template #header>
+       <h2 class="text-xl font-semibold text-neutral-100">
+         1. 基本的なAPI通信（useFetch）
+       </h2>
+     </template>
+     <div class="space-y-4">
+   ```
+
+   - `UCard`: Nuxt UI のカードコンポーネント
+   - `mb-6`: 下のマージンを 6（1.5rem）に設定
+   - `bg-neutral-950`: カードの背景色をさらに濃いグレーに設定
+   - `<template #header>`: カードのヘッダー部分を定義（スロット）
+   - `<div class="space-y-4">`: カード内のコンテンツ用のコンテナ（縦方向の間隔を 4 に設定）
+
+3. ✅ ローディング状態の表示を追加
+
+   ```vue
+   <div v-if="postsPending" class="text-neutral-400">読み込み中...</div>
+   ```
+
+   - `v-if="postsPending"`: postsPending が true の時だけ表示
+   - `text-neutral-400`: テキスト色をライトグレーに設定
+
+4. ✅ エラー状態の表示を追加
+
+   ```vue
+   <div v-if="postsError" class="text-red-400">
+     エラー: {{ postsError.message }}
+   </div>
+   ```
+
+   - `v-if="postsError"`: postsError が null でない時だけ表示
+   - `{{ postsError.message }}`: エラーメッセージを表示（Vue のテンプレート構文）
+
+5. ✅ データ表示部分を追加
+
+   ```vue
+   <div v-if="posts && !postsPending" class="space-y-2">
+     <p class="text-neutral-300">取得した投稿数: {{ posts.length }}件</p>
+   ```
+
+   - `v-if="posts && !postsPending"`: posts が存在し、かつローディングが終わった時だけ表示
+   - `space-y-2`: 子要素の縦方向の間隔を 2（0.5rem）に設定
+   - `{{ posts.length }}`: 配列の要素数を表示
+
+6. ✅ スクロール可能なコンテナを追加
+
+   ```vue
+   <div class="max-h-40 overflow-y-auto">
+   ```
+
+   - `max-h-40`: 最大高さを 40（10rem）に制限
+   - `overflow-y-auto`: 縦方向のスクロールを有効化
+
+7. ✅ v-for で投稿リストを表示
+
+   ```vue
+   <div
+   	v-for="post in posts.slice(0, 3)"
+   	:key="post.id"
+   	class="p-3 bg-neutral-900 rounded-lg mb-2"
+   >
+     <p class="text-neutral-200 font-medium">{{ post.title }}</p>
+     <p class="text-neutral-400 text-sm">{{ post.body }}</p>
+   </div>
+   ```
+
+   - `v-for="post in posts.slice(0, 3)"`: posts 配列の最初の 3 件をループ
+   - `:key="post.id"`: 各要素を一意に識別するキー（Vue の必須）
+   - `p-3`: パディングを 3（0.75rem）に設定
+   - `rounded-lg`: 角を丸くする
+   - `mb-2`: 下のマージンを 2（0.5rem）に設定
+
+8. ✅ 閉じタグを追加
+
+   ```vue
+     </div>
+   </div>
+   </UCard>
+   ```
+
+   - スクロール可能なコンテナを閉じる（`</div>`）
+   - データ表示部分を閉じる（`</div>`）
+   - UCard コンポーネントを閉じる（`</UCard>`）
 
 ### 🧪 確認ポイント
 
@@ -424,7 +620,7 @@ const fetchUserManually = async () => {
    - レスポンスボディを JSON としてパースします
    - これも非同期処理なので`await`が必要です
 
-#### `<template>`部分の実装（既に実装済み、確認のみ）
+#### `<template>`部分の実装
 
 ```vue
 <!-- セクション2: 手動での非同期処理（async/await） -->
@@ -486,9 +682,42 @@ const fetchUserManually = async () => {
 </UCard>
 ```
 
+**一行一行の詳細解説**：
+
+1. **`<UCard>`コンポーネント**
+
+   - Nuxt UI のカードコンポーネントを使用
+   - `mb-6`: 下のマージンを設定（セクション間の間隔）
+   - `bg-neutral-950`: カードの背景色を設定
+
+2. **`<template #header>`スロット**
+
+   - カードのヘッダー部分を定義
+   - `#header`は`v-slot:header`の省略形
+   - セクションのタイトルを表示
+
+3. **`<UButton>`コンポーネント**
+
+   - `@click="fetchUserManually"`: クリック時に`fetchUserManually`関数を実行
+   - `:loading="manualLoading"`: ローディング状態を props として渡す
+   - `color="primary"`: ボタンの色をプライマリーカラーに設定
+
+4. **エラー表示部分**
+
+   - `v-if="manualError"`: manualError が null でない時だけ表示
+   - `bg-red-950/20`: 背景色を赤系の半透明に設定（`/20`は透明度 20%）
+   - `rounded`: 角を丸くする
+
+5. **データ表示部分**
+   - `v-if="manualUser && !manualLoading"`: データが存在し、ローディングが終わった時だけ表示
+   - `manualUser.name`: オブジェクトのプロパティにアクセス
+   - `text-sm`: テキストサイズを小さく設定
+
 ### 📝 実装手順（チェックリスト）
 
-1. ✅ 状態管理用の`ref`を 3 つ定義（既に定義済み、確認のみ）
+#### `<script setup>`部分の実装
+
+1. ✅ 状態管理用の`ref`を 3 つ定義
 
    - `manualLoading`
    - `manualUser`
@@ -543,7 +772,61 @@ const fetchUserManually = async () => {
    }
    ```
 
-9. ✅ テンプレート部分は既に実装済み（確認のみ）
+#### `<template>`部分の実装
+
+9. ✅ UCard コンポーネントでセクション 2 のカードを作成
+
+   ```vue
+   <UCard class="mb-6 bg-neutral-950">
+     <template #header>
+       <h2 class="text-xl font-semibold text-neutral-100">
+         2. 手動での非同期処理（async/await + try/catch）
+       </h2>
+     </template>
+     <div class="space-y-4">
+   ```
+
+10. ✅ UButton コンポーネントを追加
+
+    ```vue
+    <UButton
+    	@click="fetchUserManually"
+    	:loading="manualLoading"
+    	color="primary"
+    >
+      ユーザー情報を取得
+    </UButton>
+    ```
+
+    - `@click="fetchUserManually"`: クリックイベントハンドラーを設定
+    - `:loading="manualLoading"`: ローディング状態を props として渡す
+
+11. ✅ エラー表示部分を追加
+
+    ```vue
+    <div v-if="manualError" class="text-red-400 p-3 bg-red-950/20 rounded">
+      エラー: {{ manualError }}
+    </div>
+    ```
+
+    - `v-if="manualError"`: エラーが存在する時だけ表示
+    - `bg-red-950/20`: 赤系の半透明背景（透明度 20%）
+
+12. ✅ データ表示部分を追加
+
+    ```vue
+    <div
+    	v-if="manualUser && !manualLoading"
+    	class="p-4 bg-neutral-900 rounded-lg"
+    >
+      <p class="text-neutral-200 font-medium">{{ manualUser.name }}</p>
+      <p class="text-neutral-400 text-sm">{{ manualUser.email }}</p>
+      <p class="text-neutral-400 text-sm">{{ manualUser.phone }}</p>
+    </div>
+    ```
+
+    - `v-if="manualUser && !manualLoading"`: データが存在し、ローディングが終わった時だけ表示
+    - `{{ manualUser.name }}`: オブジェクトのプロパティを表示
 
 ### 🧪 確認ポイント
 
@@ -770,9 +1053,125 @@ const fetchMultipleData = async () => {
    - 開始時刻を記録し、終了時刻との差を計算
    - 並列処理と順次処理の速度差を確認できます
 
+#### `<template>`部分の実装
+
+```vue
+<!-- セクション3: Promise.all（並列処理） -->
+<UCard class="mb-6 bg-neutral-950">
+	<template #header>
+		<h2 class="text-xl font-semibold text-neutral-100">
+			3. Promise.all（並列処理）
+		</h2>
+	</template>
+	<div class="space-y-4">
+		<!-- 
+			UButton: 並列処理を開始するボタン
+			@click="fetchMultipleData" でクリック時に関数を実行
+			:loading="parallelLoading" でローディング状態を表示
+		-->
+		<UButton
+			@click="fetchMultipleData"
+			:loading="parallelLoading"
+			color="primary"
+		>
+			複数のデータを並列取得
+		</UButton>
+
+		<!-- 
+			エラー表示
+			v-if="parallelError" で、エラーが発生した時だけ表示
+		-->
+		<div
+			v-if="parallelError"
+			class="text-red-400 p-3 bg-red-950/20 rounded"
+		>
+			エラー: {{ parallelError }}
+		</div>
+
+		<!-- 
+			データ表示
+			v-if="parallelData && !parallelLoading" で、
+			データが取得できて、ローディングが終わった時だけ表示
+		-->
+		<div v-if="parallelData && !parallelLoading" class="space-y-3">
+			<!-- 
+				投稿データの表示
+				parallelData.post?.title で投稿のタイトルを表示
+				? はオプショナルチェーンで、null の時にエラーになりません
+			-->
+			<div class="p-4 bg-neutral-900 rounded-lg">
+				<p class="text-neutral-200 font-medium mb-2">投稿 #1</p>
+				<p class="text-neutral-400 text-sm">
+					{{ parallelData.post?.title }}
+				</p>
+			</div>
+
+			<!-- 
+				ユーザーデータの表示
+				parallelData.user?.name でユーザー名を表示
+			-->
+			<div class="p-4 bg-neutral-900 rounded-lg">
+				<p class="text-neutral-200 font-medium mb-2">ユーザー #1</p>
+				<p class="text-neutral-400 text-sm">
+					{{ parallelData.user?.name }}
+				</p>
+			</div>
+
+			<!-- 
+				コメントデータの表示
+				parallelData.comment?.body でコメント本文を表示
+			-->
+			<div class="p-4 bg-neutral-900 rounded-lg">
+				<p class="text-neutral-200 font-medium mb-2">コメント #1</p>
+				<p class="text-neutral-400 text-sm">
+					{{ parallelData.comment?.body }}
+				</p>
+			</div>
+
+			<!-- 
+				処理時間の表示
+				parallelData.duration で経過時間（ミリ秒）を表示
+			-->
+			<p class="text-neutral-300 text-sm mt-2">
+				取得時間: {{ parallelData.duration }}ms
+			</p>
+		</div>
+	</div>
+</UCard>
+```
+
+**一行一行の詳細解説**：
+
+1. **`<UButton>`コンポーネント**
+
+   - `@click="fetchMultipleData"`: クリック時に並列処理を開始
+   - `:loading="parallelLoading"`: ローディング状態を表示
+
+2. **エラー表示部分**
+
+   - `v-if="parallelError"`: エラーが発生した時だけ表示
+   - セクション 2 と同じ構造
+
+3. **データ表示部分**
+
+   - `v-if="parallelData && !parallelLoading"`: データが存在し、ローディングが終わった時だけ表示
+   - `space-y-3`: 子要素の縦方向の間隔を 3（0.75rem）に設定
+
+4. **オプショナルチェーン（`?.`）**
+
+   - `parallelData.post?.title`: post が null の場合でもエラーにならない
+   - `?.`は「オプショナルチェーン」と呼ばれる構文
+   - null や undefined の場合は undefined を返す
+
+5. **処理時間の表示**
+   - `{{ parallelData.duration }}ms`: 経過時間をミリ秒で表示
+   - 並列処理の速さを確認できる
+
 ### 📝 実装手順（チェックリスト）
 
-1. ✅ 状態管理用の`ref`を定義（既に定義済み、確認のみ）
+#### `<script setup>`部分の実装
+
+1. ✅ 状態管理用の`ref`を定義
 
    - `parallelLoading`
    - `parallelData`
@@ -833,9 +1232,90 @@ const fetchMultipleData = async () => {
    }
    ```
 
-9. ✅ エラーハンドリング（既に実装済み、確認のみ）
+9. ✅ エラーハンドリング
 
-10. ✅ テンプレート部分は既に実装済み（確認のみ）
+   - `catch`ブロックでエラーをキャッチ
+   - `finally`ブロックでローディングを終了
+
+#### `<template>`部分の実装
+
+10. ✅ UCard コンポーネントでセクション 3 のカードを作成
+
+    ```vue
+    <UCard class="mb-6 bg-neutral-950">
+      <template #header>
+        <h2 class="text-xl font-semibold text-neutral-100">
+          3. Promise.all（並列処理）
+        </h2>
+      </template>
+      <div class="space-y-4">
+    ```
+
+11. ✅ UButton コンポーネントを追加
+
+    ```vue
+    <UButton
+    	@click="fetchMultipleData"
+    	:loading="parallelLoading"
+    	color="primary"
+    >
+      複数のデータを並列取得
+    </UButton>
+    ```
+
+12. ✅ エラー表示部分を追加
+
+    ```vue
+    <div v-if="parallelError" class="text-red-400 p-3 bg-red-950/20 rounded">
+      エラー: {{ parallelError }}
+    </div>
+    ```
+
+13. ✅ データ表示部分を追加（投稿データ）
+
+    ```vue
+    <div v-if="parallelData && !parallelLoading" class="space-y-3">
+      <div class="p-4 bg-neutral-900 rounded-lg">
+        <p class="text-neutral-200 font-medium mb-2">投稿 #1</p>
+        <p class="text-neutral-400 text-sm">
+          {{ parallelData.post?.title }}
+        </p>
+      </div>
+    ```
+
+    - `parallelData.post?.title`: オプショナルチェーンで安全にアクセス
+
+14. ✅ ユーザーデータの表示を追加
+
+    ```vue
+    <div class="p-4 bg-neutral-900 rounded-lg">
+      <p class="text-neutral-200 font-medium mb-2">ユーザー #1</p>
+      <p class="text-neutral-400 text-sm">
+        {{ parallelData.user?.name }}
+      </p>
+    </div>
+    ```
+
+15. ✅ コメントデータの表示を追加
+
+    ```vue
+    <div class="p-4 bg-neutral-900 rounded-lg">
+      <p class="text-neutral-200 font-medium mb-2">コメント #1</p>
+      <p class="text-neutral-400 text-sm">
+        {{ parallelData.comment?.body }}
+      </p>
+    </div>
+    ```
+
+16. ✅ 処理時間の表示を追加
+
+    ```vue
+    <p class="text-neutral-300 text-sm mt-2">
+      取得時間: {{ parallelData.duration }}ms
+    </p>
+    ```
+
+    - `mt-2`: 上のマージンを 2（0.5rem）に設定
 
 ### 🧪 確認ポイント
 
@@ -1014,9 +1494,116 @@ const fetchSequentially = async () => {
    - エラーが発生した時点で処理を中断できます
    - どの処理で失敗したかが分かりやすいです
 
+#### `<template>`部分の実装
+
+```vue
+<!-- セクション4: 順次処理（await の連続） -->
+<UCard class="mb-6 bg-neutral-950">
+	<template #header>
+		<h2 class="text-xl font-semibold text-neutral-100">
+			4. 順次処理（await の連続）
+		</h2>
+	</template>
+	<div class="space-y-4">
+		<!-- 
+			UButton: 順次処理を開始するボタン
+			@click="fetchSequentially" でクリック時に関数を実行
+			:loading="sequentialLoading" でローディング状態を表示
+		-->
+		<UButton
+			@click="fetchSequentially"
+			:loading="sequentialLoading"
+			color="primary"
+		>
+			データを順次取得
+		</UButton>
+
+		<!-- 
+			エラー表示
+			v-if="sequentialError" で、エラーが発生した時だけ表示
+		-->
+		<div
+			v-if="sequentialError"
+			class="text-red-400 p-3 bg-red-950/20 rounded"
+		>
+			エラー: {{ sequentialError }}
+		</div>
+
+		<!-- 
+			データ表示
+			v-if="sequentialData && !sequentialLoading" で、
+			データが取得できて、ローディングが終わった時だけ表示
+		-->
+		<div v-if="sequentialData && !sequentialLoading" class="space-y-3">
+			<!-- 
+				ステップ1: 投稿データの表示
+				順次処理であることを示すため、「ステップ1」というラベルを付けています
+			-->
+			<div class="p-4 bg-neutral-900 rounded-lg">
+				<p class="text-neutral-200 font-medium mb-2">
+					ステップ1: 投稿 #1
+				</p>
+				<p class="text-neutral-400 text-sm">
+					{{ sequentialData.post?.title }}
+				</p>
+			</div>
+
+			<!-- 
+				ステップ2: ユーザーデータの表示
+				順次処理であることを示すため、「ステップ2」というラベルを付けています
+			-->
+			<div class="p-4 bg-neutral-900 rounded-lg">
+				<p class="text-neutral-200 font-medium mb-2">
+					ステップ2: ユーザー #1
+				</p>
+				<p class="text-neutral-400 text-sm">
+					{{ sequentialData.user?.name }}
+				</p>
+			</div>
+
+			<!-- 
+				処理時間の表示
+				順次処理の合計時間を表示します
+				並列処理と比較して、時間がかかることが分かります
+			-->
+			<p class="text-neutral-300 text-sm mt-2">
+				合計時間: {{ sequentialData.duration }}ms
+			</p>
+		</div>
+	</div>
+</UCard>
+```
+
+**一行一行の詳細解説**：
+
+1. **`<UButton>`コンポーネント**
+
+   - `@click="fetchSequentially"`: クリック時に順次処理を開始
+   - `:loading="sequentialLoading"`: ローディング状態を表示
+
+2. **エラー表示部分**
+
+   - セクション 2、3 と同じ構造
+
+3. **データ表示部分**
+
+   - `v-if="sequentialData && !sequentialLoading"`: データが存在し、ローディングが終わった時だけ表示
+   - `space-y-3`: 子要素の縦方向の間隔を設定
+
+4. **ステップラベルの表示**
+
+   - 「ステップ 1」「ステップ 2」というラベルで、順次処理であることを明示
+   - 並列処理との違いを視覚的に分かりやすくする
+
+5. **処理時間の表示**
+   - `{{ sequentialData.duration }}ms`: 順次処理の合計時間を表示
+   - 並列処理と比較して、時間がかかることが確認できる
+
 ### 📝 実装手順（チェックリスト）
 
-1. ✅ 状態管理用の`ref`を定義（既に定義済み、確認のみ）
+#### `<script setup>`部分の実装
+
+1. ✅ 状態管理用の`ref`を定義
 
    - `sequentialLoading`
    - `sequentialData`
@@ -1084,9 +1671,83 @@ const fetchSequentially = async () => {
     }
     ```
 
-12. ✅ エラーハンドリング（既に実装済み、確認のみ）
+12. ✅ エラーハンドリング
 
-13. ✅ テンプレート部分は既に実装済み（確認のみ）
+    - `catch`ブロックでエラーをキャッチ
+    - `finally`ブロックでローディングを終了
+
+#### `<template>`部分の実装
+
+13. ✅ UCard コンポーネントでセクション 4 のカードを作成
+
+    ```vue
+    <UCard class="mb-6 bg-neutral-950">
+      <template #header>
+        <h2 class="text-xl font-semibold text-neutral-100">
+          4. 順次処理（await の連続）
+        </h2>
+      </template>
+      <div class="space-y-4">
+    ```
+
+14. ✅ UButton コンポーネントを追加
+
+    ```vue
+    <UButton
+    	@click="fetchSequentially"
+    	:loading="sequentialLoading"
+    	color="primary"
+    >
+      データを順次取得
+    </UButton>
+    ```
+
+15. ✅ エラー表示部分を追加
+
+    ```vue
+    <div v-if="sequentialError" class="text-red-400 p-3 bg-red-950/20 rounded">
+      エラー: {{ sequentialError }}
+    </div>
+    ```
+
+16. ✅ データ表示部分を追加（ステップ 1: 投稿データ）
+
+    ```vue
+    <div v-if="sequentialData && !sequentialLoading" class="space-y-3">
+      <div class="p-4 bg-neutral-900 rounded-lg">
+        <p class="text-neutral-200 font-medium mb-2">
+          ステップ1: 投稿 #1
+        </p>
+        <p class="text-neutral-400 text-sm">
+          {{ sequentialData.post?.title }}
+        </p>
+      </div>
+    ```
+
+    - 「ステップ 1」というラベルで順次処理であることを明示
+
+17. ✅ ステップ 2: ユーザーデータの表示を追加
+
+    ```vue
+    <div class="p-4 bg-neutral-900 rounded-lg">
+      <p class="text-neutral-200 font-medium mb-2">
+        ステップ2: ユーザー #1
+      </p>
+      <p class="text-neutral-400 text-sm">
+        {{ sequentialData.user?.name }}
+      </p>
+    </div>
+    ```
+
+18. ✅ 処理時間の表示を追加
+
+    ```vue
+    <p class="text-neutral-300 text-sm mt-2">
+      合計時間: {{ sequentialData.duration }}ms
+    </p>
+    ```
+
+    - 並列処理と比較して、時間がかかることが確認できる
 
 ### 🧪 確認ポイント
 
@@ -1297,9 +1958,115 @@ const fetchWithDetailedErrorHandling = async () => {
    - `return`で関数を終了します
    - エラーが発生した場合、それ以降のコードを実行しないようにします
 
+#### `<template>`部分の実装
+
+```vue
+<!-- セクション5: エラーハンドリングの詳細 -->
+<UCard class="mb-6 bg-neutral-950">
+	<template #header>
+		<h2 class="text-xl font-semibold text-neutral-100">
+			5. エラーハンドリング（詳細版）
+		</h2>
+	</template>
+	<div class="space-y-4">
+		<!-- 
+			UButton: エラーハンドリングをテストするボタン
+			@click="fetchWithDetailedErrorHandling" でクリック時に関数を実行
+			:loading="errorHandlingLoading" でローディング状態を表示
+		-->
+		<UButton
+			@click="fetchWithDetailedErrorHandling"
+			:loading="errorHandlingLoading"
+			color="primary"
+		>
+			エラーハンドリングをテスト
+		</UButton>
+
+		<!-- 
+			結果表示
+			v-if="errorHandlingResult" で、結果が存在する時だけ表示
+		-->
+		<div v-if="errorHandlingResult" class="space-y-2">
+			<!-- 
+				成功時の表示
+				v-if="errorHandlingResult.success" で、success が true の時だけ表示
+				bg-green-950/20: 緑系の半透明背景（成功を表す）
+				border border-green-800: 緑色のボーダー
+			-->
+			<div
+				v-if="errorHandlingResult.success"
+				class="p-4 bg-green-950/20 rounded-lg border border-green-800"
+			>
+				<p class="text-green-400 font-medium">✓ 成功</p>
+				<p class="text-neutral-300 text-sm mt-1">
+					{{ errorHandlingResult.message }}
+				</p>
+			</div>
+
+			<!-- 
+				エラー時の表示
+				v-else で、success が false の時（エラー時）に表示
+				bg-red-950/20: 赤系の半透明背景（エラーを表す）
+				border border-red-800: 赤色のボーダー
+			-->
+			<div
+				v-else
+				class="p-4 bg-red-950/20 rounded-lg border border-red-800"
+			>
+				<p class="text-red-400 font-medium">✗ エラー</p>
+				<p class="text-neutral-300 text-sm mt-1">
+					{{ errorHandlingResult.message }}
+				</p>
+				<p class="text-neutral-400 text-xs mt-1">
+					ステータス: {{ errorHandlingResult.status }}
+				</p>
+			</div>
+		</div>
+	</div>
+</UCard>
+```
+
+**一行一行の詳細解説**：
+
+1. **`<UButton>`コンポーネント**
+
+   - `@click="fetchWithDetailedErrorHandling"`: クリック時にエラーハンドリングをテスト
+   - `:loading="errorHandlingLoading"`: ローディング状態を表示
+
+2. **結果表示部分**
+
+   - `v-if="errorHandlingResult"`: 結果が存在する時だけ表示
+   - `space-y-2`: 子要素の縦方向の間隔を設定
+
+3. **成功時の表示**
+
+   - `v-if="errorHandlingResult.success"`: success が true の時だけ表示
+   - `bg-green-950/20`: 緑系の半透明背景（成功を表す）
+   - `border border-green-800`: 緑色のボーダー
+   - `text-green-400`: 緑色のテキスト
+
+4. **エラー時の表示**
+
+   - `v-else`: success が false の時（エラー時）に表示
+   - `bg-red-950/20`: 赤系の半透明背景（エラーを表す）
+   - `border border-red-800`: 赤色のボーダー
+   - `text-red-400`: 赤色のテキスト
+
+5. **ステータスコードの表示**
+
+   - `{{ errorHandlingResult.status }}`: HTTP ステータスコードまたはエラー種別を表示
+   - `text-xs`: テキストサイズをさらに小さく設定
+
+6. **`v-if`と`v-else`の使い方**
+   - `v-if`と`v-else`は条件分岐のディレクティブ
+   - `v-if`が false の場合、`v-else`が表示される
+   - 成功時とエラー時で異なるスタイルを適用できる
+
 ### 📝 実装手順（チェックリスト）
 
-1. ✅ 状態管理用の`ref`を定義（既に定義済み、確認のみ）
+#### `<script setup>`部分の実装
+
+1. ✅ 状態管理用の`ref`を定義
 
    - `errorHandlingLoading`
    - `errorHandlingResult`
@@ -1390,7 +2157,81 @@ const fetchWithDetailedErrorHandling = async () => {
    }
    ```
 
-10. ✅ テンプレート部分は既に実装済み（確認のみ）
+10. ✅ `finally`ブロックでローディングを終了
+
+    ```typescript
+    finally {
+      errorHandlingLoading.value = false
+    }
+    ```
+
+#### `<template>`部分の実装
+
+11. ✅ UCard コンポーネントでセクション 5 のカードを作成
+
+    ```vue
+    <UCard class="mb-6 bg-neutral-950">
+      <template #header>
+        <h2 class="text-xl font-semibold text-neutral-100">
+          5. エラーハンドリング（詳細版）
+        </h2>
+      </template>
+      <div class="space-y-4">
+    ```
+
+12. ✅ UButton コンポーネントを追加
+
+    ```vue
+    <UButton
+    	@click="fetchWithDetailedErrorHandling"
+    	:loading="errorHandlingLoading"
+    	color="primary"
+    >
+      エラーハンドリングをテスト
+    </UButton>
+    ```
+
+13. ✅ 結果表示部分を追加
+
+    ```vue
+    <div v-if="errorHandlingResult" class="space-y-2">
+    ```
+
+14. ✅ 成功時の表示を追加
+
+    ```vue
+    <div
+    	v-if="errorHandlingResult.success"
+    	class="p-4 bg-green-950/20 rounded-lg border border-green-800"
+    >
+      <p class="text-green-400 font-medium">✓ 成功</p>
+      <p class="text-neutral-300 text-sm mt-1">
+        {{ errorHandlingResult.message }}
+      </p>
+    </div>
+    ```
+
+    - `bg-green-950/20`: 緑系の半透明背景（成功を表す）
+    - `border border-green-800`: 緑色のボーダー
+
+15. ✅ エラー時の表示を追加
+
+    ```vue
+    <div v-else class="p-4 bg-red-950/20 rounded-lg border border-red-800">
+      <p class="text-red-400 font-medium">✗ エラー</p>
+      <p class="text-neutral-300 text-sm mt-1">
+        {{ errorHandlingResult.message }}
+      </p>
+      <p class="text-neutral-400 text-xs mt-1">
+        ステータス: {{ errorHandlingResult.status }}
+      </p>
+    </div>
+    ```
+
+    - `v-else`: success が false の時（エラー時）に表示
+    - `bg-red-950/20`: 赤系の半透明背景（エラーを表す）
+    - `border border-red-800`: 赤色のボーダー
+    - ステータスコードも表示
 
 ### 🧪 確認ポイント
 
