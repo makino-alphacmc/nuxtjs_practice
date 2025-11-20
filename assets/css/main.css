@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 3.9%;
+  --foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+}
+
+body {
+  background-color: rgb(23, 23, 23); /* bg-neutral-900 */
+  color: rgb(245, 245, 245); /* text-neutral-100 */
+}
+
