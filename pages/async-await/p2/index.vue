@@ -3,6 +3,13 @@
 		<div class="max-w-4xl mx-auto">
 			<h1 class="text-3xl font-bold text-neutral-100 mb-8">非同期処理の練習</h1>
 			<!-- セクション1: 基本的なAPI通信（useFetch） -->
+			<template>
+				<h2>1.基本的なAPI通信（useFetch）</h2>
+			</template>
+			<div class="space-y-4">
+				<div v-if="postsPending" class="text-neutral">読み込み中...</div>
+			</div>
+
 			<!-- セクション2: 手動での非同期処理（async/await） -->
 			<!-- セクション3: Promise.all（並列処理） -->
 			<!-- セクション4: 順次処理（await の連続） -->
