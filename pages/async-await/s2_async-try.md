@@ -1,5 +1,8 @@
 # セクション 2: 手動での非同期処理（async/await + try/catch）
 
+> **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
+> JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。ユーザー情報、投稿、コメントなどのサンプルデータを提供しており、実際のバックエンドサーバーなしでフロントエンドの開発や学習が可能です。
+
 ## 手動実装とは、なぜ必要なのか？
 
 ### 手動実装とは
@@ -27,7 +30,7 @@
 const load = async () => {
 	resetStates() // 前回分をクリア
 	try {
-		const raw = await fetch('/api/example')
+		const raw = await fetch('https://jsonplaceholder.typicode.com/users/1')
 		validate(raw)
 		const result = await raw.json()
 		store(result)
@@ -107,7 +110,7 @@ const fetchUserManually = async () => {
 - `manualLoading / manualUser / manualError`: 3 つの `ref` で UI 表示に必要な状態を切り分け
 - `manualUser.value = null`: 新しい取得を始める前に前回結果を必ずリセット
 - `manualLoading.value = true`: API 呼び出しが始まったタイミングでローディングをオン
-- `await fetch(...)`: ブラウザ組み込みの Fetch API でリクエストを送信
+- `await fetch('https://jsonplaceholder.typicode.com/users/1')`: JSONPlaceholder のユーザー API を呼び出し。ID 1 のユーザー情報を取得します
 - `if (!response.ok) { throw ... }`: HTTP 400/500 系を手動で検出し、catch に処理を委ねる
 - `await response.json()`: ボディを JSON へパース。await しないと Promise が残ってしまう
 - `catch (error) { ... }`: エラーの型をチェックしつつユーザー表示用の文字列をセット

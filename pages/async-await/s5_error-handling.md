@@ -1,5 +1,8 @@
 # セクション 5: エラーハンドリングを徹底解説
 
+> **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
+> JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。存在しない ID（例: /posts/99999）を指定することで 404 エラーを意図的に発生させ、エラーハンドリングの学習に最適です。
+
 ## エラーハンドリングとは、なぜ必要なのか？
 
 ### エラーハンドリングとは
@@ -8,16 +11,16 @@ API 呼び出しの **失敗パターンを整理し、ユーザーと開発者�
 
 ### なぜ必要なのか？
 
-1. **異常時の UX を守る** – 失敗原因を明示すれば、ユーザーが再試行・問い合わせの判断をしやすい  
-2. **デバッグ効率を上げる** – ステータスやエラータイプをロギングすれば、開発者がすぐ原因を特定できる  
-3. **障害時の影響を局所化** – 期待しないレスポンスでも画面全体が壊れないようにできる  
+1. **異常時の UX を守る** – 失敗原因を明示すれば、ユーザーが再試行・問い合わせの判断をしやすい
+2. **デバッグ効率を上げる** – ステータスやエラータイプをロギングすれば、開発者がすぐ原因を特定できる
+3. **障害時の影響を局所化** – 期待しないレスポンスでも画面全体が壊れないようにできる
 4. **実務で必須の要件** – 監視・アラート・サポート対応など、プロダクション運用に直結する
 
 ### 主な特徴
 
-- **HTTP レイヤーとネットワーク例外を分けて扱う**  
-- **メッセージ設計をあらかじめ決めておく**（404/500/unknown など）  
-- **結果オブジェクトを 1 箇所にまとめる**ことで、テンプレート側がシンプルになる  
+- **HTTP レイヤーとネットワーク例外を分けて扱う**
+- **メッセージ設計をあらかじめ決めておく**（404/500/unknown など）
+- **結果オブジェクトを 1 箇所にまとめる**ことで、テンプレート側がシンプルになる
 - **UI の色やアイコンで状態変化を即座に伝える**
 
 ## 一般的な使用例
@@ -26,7 +29,7 @@ API 呼び出しの **失敗パターンを整理し、ユーザーと開発者�
 
 ```typescript
 try {
-	const response = await fetch('/api/sample')
+	const response = await fetch('https://jsonplaceholder.typicode.com/posts/1')
 	validateStatus(response) // ステータス判定
 	const data = await response.json()
 	showSuccess(data)
@@ -67,7 +70,9 @@ const fetchWithDetailedErrorHandling = async () => {
 	errorHandlingLoading.value = true // ボタンのローディングを開始
 
 	try {
-		const response = await fetch('https://jsonplaceholder.typicode.com/posts/99999') // 404 を返すテスト API
+		const response = await fetch(
+			'https://jsonplaceholder.typicode.com/posts/99999'
+		) // 404 を返すテスト API
 
 		if (response.status === 404) {
 			errorHandlingResult.value = {
@@ -125,12 +130,12 @@ const fetchWithDetailedErrorHandling = async () => {
 
 **コードの説明：**
 
-- `errorHandlingResult`: `success`/`message`/`status` を 1 つのオブジェクトにまとめ、テンプレート側の分岐を単純化  
-- `fetch('...99999')`: わざと 404 を返すエンドポイントを叩き、パターンを検証  
-- `status === 404`, `status >= 500`, `!ok`: 頻出ケースを段階的にチェックし、メッセージを出し分け  
-- `return` を挟んで早期リターンし、成功時の JSON 解析までたどり着かないようにする  
-- `TypeError` 判定でネットワークエラー特有のメッセージを表示  
-- `console.error` で詳細を残し、ユーザー表示とは別に開発者が調査しやすいようにする  
+- `errorHandlingResult`: `success`/`message`/`status` を 1 つのオブジェクトにまとめ、テンプレート側の分岐を単純化
+- `fetch('https://jsonplaceholder.typicode.com/posts/99999')`: JSONPlaceholder の存在しない ID（99999）を指定し、意図的に 404 エラーを発生させてエラーハンドリングのパターンを検証
+- `status === 404`, `status >= 500`, `!ok`: 頻出ケースを段階的にチェックし、メッセージを出し分け
+- `return` を挟んで早期リターンし、成功時の JSON 解析までたどり着かないようにする
+- `TypeError` 判定でネットワークエラー特有のメッセージを表示（オフライン時など）
+- `console.error` で詳細を残し、ユーザー表示とは別に開発者が調査しやすいようにする
 - `finally` でローディングを必ず解除し、ボタンを再び押せるようにする
 
 ### 2. Template 部分の実装
@@ -149,7 +154,12 @@ const fetchWithDetailedErrorHandling = async () => {
 	</div>
 </template>
 
-<UButton @click="fetchWithDetailedErrorHandling" :loading="errorHandlingLoading" color="primary" class="mt-4">
+<UButton
+	@click="fetchWithDetailedErrorHandling"
+	:loading="errorHandlingLoading"
+	color="primary"
+	class="mt-4"
+>
 	<template v-if="!errorHandlingLoading">エラーハンドリングをテスト</template>
 	<template v-else>テスト実行中...</template>
 </UButton>
@@ -157,7 +167,7 @@ const fetchWithDetailedErrorHandling = async () => {
 
 **コードの説明：**
 
-- ヘッダーで最新のステータスコード／エラータイプを確認できるようにし、何度もテストする際のメモになる  
+- ヘッダーで最新のステータスコード／エラータイプを確認できるようにし、何度もテストする際のメモになる
 - ボタンのローディング表示は他セクションと統一し、操作感を揃える
 
 #### 2-2. 成功／失敗の結果表示
@@ -215,13 +225,13 @@ const fetchWithDetailedErrorHandling = async () => {
 
 **コードの説明：**
 
-- `errorHandlingResult.success` の真偽で成功カード／エラーカードを切り替え  
-- 失敗時はステータスを表形式で表示し、404/NETWORK_ERROR などをひと目で判別  
+- `errorHandlingResult.success` の真偽で成功カード／エラーカードを切り替え
+- 失敗時はステータスを表形式で表示し、404/NETWORK_ERROR などをひと目で判別
 - 追加の行を `v-else-if` で用意し、今後ステータスが増えても簡単に拡張可能
 
 ## まとめ
 
-1. **エラーハンドリングはメッセージ設計と UI 表現をセットで考える**  
-2. **ステータスごとの早期リターンと catch フォールバック**でコードの見通しを良くできる  
-3. **結果オブジェクトを 1 箇所にまとめるとテンプレートがシンプル**になり、再利用もしやすい  
+1. **エラーハンドリングはメッセージ設計と UI 表現をセットで考える**
+2. **ステータスごとの早期リターンと catch フォールバック**でコードの見通しを良くできる
+3. **結果オブジェクトを 1 箇所にまとめるとテンプレートがシンプル**になり、再利用もしやすい
 4. ここまでで useFetch → 手動 async → Promise.all → 連続 await → 詳細エラー管理という非同期処理の主要パターンを網羅できたので、必要に応じてリトライやログ送信などの発展パターンにも挑戦してみよう

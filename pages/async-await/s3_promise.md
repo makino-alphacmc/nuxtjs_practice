@@ -1,5 +1,8 @@
 # セクション 3: Promise.all で複数データを並列取得
 
+> **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
+> JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。投稿（posts）、ユーザー（users）、コメント（comments）などのサンプルデータを提供しており、複数の API を同時に呼び出す並列処理の学習に最適です。
+
 ## Promise.all とは、なぜ必要なのか？
 
 ### Promise.all とは

@@ -1,5 +1,8 @@
 # セクション 4: await を連続させた順次データ取得
 
+> **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
+> JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。投稿（posts）とユーザー（users）を順番に取得する順次処理の学習に最適です。
+
 ## 順次実行とは、なぜ必要なのか？
 
 ### 順次実行とは
@@ -36,8 +39,10 @@ const runSteps = async () => {
 
 1. **親データ → 子データ**
    ```typescript
-   const post = await fetchPost(id)
-   const comments = await fetchComments(post.id)
+   const post = await fetch('https://jsonplaceholder.typicode.com/posts/1')
+   const comments = await fetch(
+   	`https://jsonplaceholder.typicode.com/posts/${post.id}/comments`
+   )
    ```
 2. **認証 → プロフィール取得**
    ```typescript
@@ -92,7 +97,9 @@ const fetchSequentially = async () => {
 **コードの説明：**
 
 - `sequentialLoading / sequentialData / sequentialError`: 順次処理専用の状態を切り分け、UI と同期
-- `await fetch(...)` を 2 回に分けて記述し、処理の依存関係を明示
+- `await fetch('https://jsonplaceholder.typicode.com/posts/1')`: JSONPlaceholder の投稿 API を呼び出し。ID 1 の投稿を取得します
+- `await fetch('https://jsonplaceholder.typicode.com/users/1')`: JSONPlaceholder のユーザー API を呼び出し。ID 1 のユーザー情報を取得します
+- `await fetch(...)` を 2 回に分けて記述し、処理の依存関係を明示（投稿取得が完了してからユーザー取得を開始）
 - それぞれのレスポンスで `.ok` を確認し、失敗時は即例外化して後続ステップを止める
 - `duration` を保存することで、セクション 3 の並列取得との速度差を比較できる
 - `catch` ではユーザー向け文言とログ出力を分け、UX とデバッグの両立を図る
