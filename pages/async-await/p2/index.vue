@@ -84,6 +84,9 @@
 								</tr>
 							</tbody>
 						</table>
+						<div class="mt-4 text-sm text-neutral-400 text-center">
+							表示中：1-10件 / 全{{ posts.length }}件
+						</div>
 					</div>
 				</div>
 			</UCard>
