@@ -1,4 +1,4 @@
-<!-- components/crud/p1/PostCreateForm.vue -->
+<!-- components/http-signal/p1/PostCreateForm.vue -->
 <template>
 	<UCard class="bg-neutral-950">
 		<template #header>
@@ -41,7 +41,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import type { CreatePostRequest } from '~/types/crud/p1/api'
+import type { CreatePostRequest } from '~/types/http-signal/p1/api'
 
 export default defineComponent({
 	name: 'PostCreateForm',

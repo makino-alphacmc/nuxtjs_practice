@@ -1,4 +1,4 @@
-<!-- components/crud/p1/PostDeleteInfo.vue -->
+<!-- components/http-signal/p1/PostDeleteInfo.vue -->
 <template>
 	<UCard class="bg-neutral-950">
 		<template #header>

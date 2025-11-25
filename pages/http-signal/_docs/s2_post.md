@@ -10,19 +10,19 @@
 ```
 nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
-│   └── crud/
+│   └── http-signal/
 │       └── p1/
 │           └── api.ts                # CreatePostRequest 型定義
 ├── composables/                      # Composables（必須）
-│   └── crud/
+│   └── http-signal/
 │       └── p1/
 │           └── useHttpPosts.ts        # createPost() メソッド
 ├── components/                       # コンポーネント（必須）
-│   └── crud/
+│   └── http-signal/
 │       └── p1/
 │           └── PostCreateForm.vue    # 新規投稿作成フォーム
 └── pages/
-    └── crud/
+    └── http-signal/
         ├── _docs/                    # マニュアルファイル
         │   ├── README.md             # 全体構成の説明
         │   ├── s1_get.md            # GET の詳細解説
@@ -35,9 +35,9 @@ nuxtjs_practice/
 
 **実務で必須の 4 つの概念:**
 
-1. **型定義の明確化** - `types/crud/p1/api.ts` で `any` の使用を減らす
-2. **コンポーネントの分割** - `components/crud/p1/PostCreateForm.vue` で再利用性・保守性を向上
-3. **ロジックの分離** - `composables/crud/p1/useHttpPosts.ts` で composables を活用
+1. **型定義の明確化** - `types/http-signal/p1/api.ts` で `any` の使用を減らす
+2. **コンポーネントの分割** - `components/http-signal/p1/PostCreateForm.vue` で再利用性・保守性を向上
+3. **ロジックの分離** - `composables/http-signal/p1/useHttpPosts.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
 ## POST とは、なぜ必要なのか？
@@ -123,7 +123,7 @@ const data = await $fetch<Post>('https://jsonplaceholder.typicode.com/posts', {
 #### 1-1. 型定義ファイルの作成
 
 ```typescript
-// types/crud/p1/api.ts
+// types/http-signal/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -166,7 +166,7 @@ export interface CreatePostRequest {
 #### 1-2. 型定義の使用
 
 ```typescript
-import type { CreatePostRequest, Post } from '~/types/crud/p1/api'
+import type { CreatePostRequest, Post } from '~/types/http-signal/p1/api'
 
 // $fetch に型を指定
 const createPost = async (postData: CreatePostRequest) => {
@@ -192,8 +192,8 @@ const createPost = async (postData: CreatePostRequest) => {
 #### 2-1. composables/useHttpPosts.ts の作成
 
 ```typescript
-// composables/crud/p1/useHttpPosts.ts
-import type { Post, CreatePostRequest } from '~/types/crud/p1/api'
+// composables/http-signal/p1/useHttpPosts.ts
+import type { Post, CreatePostRequest } from '~/types/http-signal/p1/api'
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com/posts'
 
@@ -250,13 +250,13 @@ export const useHttpPosts = () => {
 #### 2-2. コンポーネントでの使用
 
 ```typescript
-// pages/crud/p1/index.vue
+// pages/http-signal/p1/index.vue
 <script setup lang="ts">
 // Composables を明示的にインポート
-import { useHttpPosts } from '~/composables/crud/p1/useHttpPosts'
+import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
 
 // 型定義を明示的にインポート
-import type { CreatePostRequest } from '~/types/crud/p1/api'
+import type { CreatePostRequest } from '~/types/http-signal/p1/api'
 
 // composable を使うことで、ロジックが再利用可能になる
 const { loading, createPost } = useHttpPosts()
@@ -279,7 +279,7 @@ const handleCreatePost = async (postData: CreatePostRequest) => {
 #### 3-1. components/PostCreateForm.vue の作成
 
 ```vue
-<!-- components/crud/p1/PostCreateForm.vue -->
+<!-- components/http-signal/p1/PostCreateForm.vue -->
 <template>
 	<UCard class="bg-neutral-950">
 		<template #header>
@@ -322,7 +322,7 @@ const handleCreatePost = async (postData: CreatePostRequest) => {
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import type { CreatePostRequest } from '~/types/crud/p1/api'
+import type { CreatePostRequest } from '~/types/http-signal/p1/api'
 
 export default defineComponent({
 	name: 'PostCreateForm',
@@ -380,7 +380,7 @@ export default defineComponent({
 #### 3-2. 親コンポーネントでの使用
 
 ```vue
-<!-- pages/crud/p1/index.vue -->
+<!-- pages/http-signal/p1/index.vue -->
 <template>
 	<div>
 		<PostCreateForm
@@ -392,13 +392,13 @@ export default defineComponent({
 
 <script setup lang="ts">
 // Composables を明示的にインポート
-import { useHttpPosts } from '~/composables/crud/p1/useHttpPosts'
+import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
 
 // Components を明示的にインポート
-import PostCreateForm from '~/components/crud/p1/PostCreateForm.vue'
+import PostCreateForm from '~/components/http-signal/p1/PostCreateForm.vue'
 
 // 型定義を明示的にインポート
-import type { CreatePostRequest } from '~/types/crud/p1/api'
+import type { CreatePostRequest } from '~/types/http-signal/p1/api'
 
 // composable からデータを取得
 const { loading, createPost } = useHttpPosts()
@@ -414,22 +414,22 @@ const handleCreatePost = async (postData: CreatePostRequest) => {
 
 ### 4. 明示的なインポート（トラブル回避）
 
-Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/crud/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
+Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/http-signal/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
 
 #### 4-1. 明示的なインポートの実装
 
 ```typescript
-// pages/crud/p1/index.vue
+// pages/http-signal/p1/index.vue
 <script setup lang="ts">
 // Composables を明示的にインポート
-// 注: composables/crud/p1/ のような深い階層では自動インポートが機能しないため、明示的にインポートします
-import { useHttpPosts } from '~/composables/crud/p1/useHttpPosts'
+// 注: composables/http-signal/p1/ のような深い階層では自動インポートが機能しないため、明示的にインポートします
+import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
 
 // Components を明示的にインポート
-import PostCreateForm from '~/components/crud/p1/PostCreateForm.vue'
+import PostCreateForm from '~/components/http-signal/p1/PostCreateForm.vue'
 
 // 型定義を明示的にインポート
-import type { CreatePostRequest } from '~/types/crud/p1/api'
+import type { CreatePostRequest } from '~/types/http-signal/p1/api'
 ```
 
 **明示的なインポートのメリット：**
@@ -500,7 +500,7 @@ import type { CreatePostRequest } from '~/types/crud/p1/api'
 ### 1. 型定義の明確化
 
 ```typescript
-// types/crud/p1/api.ts
+// types/http-signal/p1/api.ts
 export interface CreatePostRequest {
 	title: string
 	body: string
@@ -517,7 +517,7 @@ export interface CreatePostRequest {
 ### 2. ロジックの分離（Composables）
 
 ```typescript
-// composables/crud/p1/useHttpPosts.ts
+// composables/http-signal/p1/useHttpPosts.ts
 const createPost = async (postData: CreatePostRequest) => {
 	const data = await $fetch<Post>(BASE_URL, {
 		method: 'POST',
@@ -536,7 +536,7 @@ const createPost = async (postData: CreatePostRequest) => {
 ### 3. コンポーネントの分割
 
 ```vue
-<!-- components/crud/p1/PostCreateForm.vue -->
+<!-- components/http-signal/p1/PostCreateForm.vue -->
 <template>
 	<UCard>
 		<!-- 新規投稿作成フォームのUI -->
@@ -553,10 +553,10 @@ const createPost = async (postData: CreatePostRequest) => {
 ### 4. 明示的なインポート
 
 ```typescript
-// pages/crud/p1/index.vue
-import { useHttpPosts } from '~/composables/crud/p1/useHttpPosts'
-import PostCreateForm from '~/components/crud/p1/PostCreateForm.vue'
-import type { CreatePostRequest } from '~/types/crud/p1/api'
+// pages/http-signal/p1/index.vue
+import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
+import PostCreateForm from '~/components/http-signal/p1/PostCreateForm.vue'
+import type { CreatePostRequest } from '~/types/http-signal/p1/api'
 ```
 
 **メリット：**
@@ -575,10 +575,10 @@ POST リクエストを使うことで、以下のメリットが得られます
 
 ### 実装の流れ
 
-1. **型定義を作成**: `types/crud/p1/api.ts` で型を定義
-2. **Composable を作成**: `composables/crud/p1/useHttpPosts.ts` でロジックを分離
-3. **コンポーネントを作成**: `components/crud/p1/PostCreateForm.vue` で UI を分割
-4. **メインコンポーネントで統合**: `pages/crud/p1/index.vue` で全てを組み合わせる
+1. **型定義を作成**: `types/http-signal/p1/api.ts` で型を定義
+2. **Composable を作成**: `composables/http-signal/p1/useHttpPosts.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/http-signal/p1/PostCreateForm.vue` で UI を分割
+4. **メインコンポーネントで統合**: `pages/http-signal/p1/index.vue` で全てを組み合わせる
 
 このセクションでは、POST リクエストの基本的な使い方と、実務で必須の 4 つの概念（型定義・Composables・コンポーネント分割・明示的なインポート）を学びました。次のセクションでは、PUT リクエストを使ったデータの更新方法を学びます。
 

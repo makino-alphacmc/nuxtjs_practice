@@ -1,4 +1,4 @@
-// types/crud/p1/api.ts
+// types/http-signal/p1/api.ts
 
 export interface Post {
 	id: number

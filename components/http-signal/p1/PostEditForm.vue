@@ -1,4 +1,4 @@
-<!-- components/crud/p1/PostEditForm.vue -->
+<!-- components/http-signal/p1/PostEditForm.vue -->
 <template>
 	<UCard class="bg-neutral-950" data-edit-section>
 		<template #header>
@@ -57,7 +57,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
-import type { UpdatePostRequest } from '~/types/crud/p1/api'
+import type { UpdatePostRequest } from '~/types/http-signal/p1/api'
 
 export default defineComponent({
 	name: 'PostEditForm',

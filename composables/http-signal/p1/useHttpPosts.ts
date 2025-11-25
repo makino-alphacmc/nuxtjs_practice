@@ -1,5 +1,5 @@
-// composables/crud/p1/useHttpPosts.ts
-import type { Post, CreatePostRequest, UpdatePostRequest } from '~/types/crud/p1/api'
+// composables/http-signal/p1/useHttpPosts.ts
+import type { Post, CreatePostRequest, UpdatePostRequest } from '~/types/http-signal/p1/api'
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com/posts'
 

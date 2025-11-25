@@ -48,20 +48,20 @@
 
 <script setup lang="ts">
 // Composables を明示的にインポート
-import { useHttpPosts } from '~/composables/crud/p1/useHttpPosts'
+import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
 
 // Components を明示的にインポート
-import PostList from '~/components/crud/p1/PostList.vue'
-import PostCreateForm from '~/components/crud/p1/PostCreateForm.vue'
-import PostEditForm from '~/components/crud/p1/PostEditForm.vue'
-import PostDeleteInfo from '~/components/crud/p1/PostDeleteInfo.vue'
+import PostList from '~/components/http-signal/p1/PostList.vue'
+import PostCreateForm from '~/components/http-signal/p1/PostCreateForm.vue'
+import PostEditForm from '~/components/http-signal/p1/PostEditForm.vue'
+import PostDeleteInfo from '~/components/http-signal/p1/PostDeleteInfo.vue'
 
 // 型定義を明示的にインポート
 import type {
 	Post,
 	CreatePostRequest,
 	UpdatePostRequest,
-} from '~/types/crud/p1/api'
+} from '~/types/http-signal/p1/api'
 
 // HTTP通信のcomposableを使用
 const {
@@ -161,3 +161,4 @@ onMounted(() => {
 	handleFetchPosts()
 })
 </script>
+

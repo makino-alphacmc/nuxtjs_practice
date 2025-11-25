@@ -1,4 +1,4 @@
-<!-- components/crud/p1/PostList.vue -->
+<!-- components/http-signal/p1/PostList.vue -->
 <template>
 	<UCard class="bg-neutral-950">
 		<template #header>
@@ -107,7 +107,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type { Post } from '~/types/crud/p1/api'
+import type { Post } from '~/types/http-signal/p1/api'
 
 export default defineComponent({
 	name: 'PostList',

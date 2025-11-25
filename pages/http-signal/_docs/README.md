@@ -1,4 +1,4 @@
-# API連携（HTTP通信）の練習（crud/p1）
+# API連携（HTTP通信）の練習（http-signal/p1）
 
 ## 概要
 
@@ -16,22 +16,22 @@
 ```
 nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
-│   └── crud/
+│   └── http-signal/
 │       └── p1/
 │           └── api.ts                # Post, CreatePostRequest, UpdatePostRequest の型定義
 ├── composables/                      # Composables（必須）
-│   └── crud/
+│   └── http-signal/
 │       └── p1/
 │           └── useHttpPosts.ts      # HTTP通信のロジック（GET/POST/PUT/DELETE）
 ├── components/                       # コンポーネント（必須）
-│   └── crud/
+│   └── http-signal/
 │       └── p1/
 │           ├── PostList.vue         # 投稿一覧表示コンポーネント（GET）
 │           ├── PostCreateForm.vue    # 新規投稿作成フォーム（POST）
 │           ├── PostEditForm.vue     # 投稿更新フォーム（PUT）
 │           └── PostDeleteInfo.vue   # 削除説明コンポーネント（DELETE）
 └── pages/
-    └── crud/
+    └── http-signal/
         ├── _docs/                   # マニュアルファイル
         │   ├── README.md            # このファイル（全体構成）
         │   ├── s1_get.md            # GET の詳細解説
@@ -49,9 +49,9 @@ nuxtjs_practice/
 **目的:** HTTP GET リクエストを使ってデータを取得する方法を学習
 
 **使用ファイル:**
-- `composables/crud/p1/useHttpPosts.ts` - `fetchPosts()` メソッド
-- `components/crud/p1/PostList.vue` - 投稿一覧表示 UI
-- `types/crud/p1/api.ts` - Post 型定義
+- `composables/http-signal/p1/useHttpPosts.ts` - `fetchPosts()` メソッド
+- `components/http-signal/p1/PostList.vue` - 投稿一覧表示 UI
+- `types/http-signal/p1/api.ts` - Post 型定義
 
 **特徴:**
 - `$fetch` を使った手動での HTTP リクエスト
@@ -65,9 +65,9 @@ nuxtjs_practice/
 **目的:** HTTP POST リクエストを使ってデータを作成する方法を学習
 
 **使用ファイル:**
-- `composables/crud/p1/useHttpPosts.ts` - `createPost()` メソッド
-- `components/crud/p1/PostCreateForm.vue` - 新規投稿作成フォーム
-- `types/crud/p1/api.ts` - CreatePostRequest 型定義
+- `composables/http-signal/p1/useHttpPosts.ts` - `createPost()` メソッド
+- `components/http-signal/p1/PostCreateForm.vue` - 新規投稿作成フォーム
+- `types/http-signal/p1/api.ts` - CreatePostRequest 型定義
 
 **特徴:**
 - フォーム入力からデータを作成
@@ -81,9 +81,9 @@ nuxtjs_practice/
 **目的:** HTTP PUT リクエストを使ってデータを更新する方法を学習
 
 **使用ファイル:**
-- `composables/crud/p1/useHttpPosts.ts` - `updatePost()` メソッド
-- `components/crud/p1/PostEditForm.vue` - 投稿更新フォーム
-- `types/crud/p1/api.ts` - UpdatePostRequest 型定義
+- `composables/http-signal/p1/useHttpPosts.ts` - `updatePost()` メソッド
+- `components/http-signal/p1/PostEditForm.vue` - 投稿更新フォーム
+- `types/http-signal/p1/api.ts` - UpdatePostRequest 型定義
 
 **特徴:**
 - 既存データを選択して編集
@@ -97,9 +97,9 @@ nuxtjs_practice/
 **目的:** HTTP DELETE リクエストを使ってデータを削除する方法を学習
 
 **使用ファイル:**
-- `composables/crud/p1/useHttpPosts.ts` - `deletePost()` メソッド
-- `components/crud/p1/PostList.vue` - 削除ボタン
-- `components/crud/p1/PostDeleteInfo.vue` - 削除説明
+- `composables/http-signal/p1/useHttpPosts.ts` - `deletePost()` メソッド
+- `components/http-signal/p1/PostList.vue` - 削除ボタン
+- `components/http-signal/p1/PostDeleteInfo.vue` - 削除説明
 
 **特徴:**
 - 削除確認ダイアログを表示
@@ -115,7 +115,7 @@ nuxtjs_practice/
 `any` を使わずに**型定義を明確に**することで、IDE の補完機能が働き、実行時エラーを防ぐことができます。
 
 ```typescript
-// types/crud/p1/api.ts
+// types/http-signal/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -140,7 +140,7 @@ export interface CreatePostRequest {
 ロジックを**composables**に分離することで、再利用性と保守性が向上します。
 
 ```typescript
-// composables/crud/p1/useHttpPosts.ts
+// composables/http-signal/p1/useHttpPosts.ts
 export const useHttpPosts = () => {
 	const posts = useState<Post[]>('http-posts', () => [])
 	const loading = useState<boolean>('http-posts-loading', () => false)
@@ -163,7 +163,7 @@ export const useHttpPosts = () => {
 大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
 
 ```vue
-<!-- components/crud/p1/PostList.vue -->
+<!-- components/http-signal/p1/PostList.vue -->
 <template>
 	<UCard>
 		<!-- 投稿一覧のUI -->
@@ -189,15 +189,15 @@ export const useHttpPosts = () => {
 - 型定義は常に明示的にインポート
 
 ```typescript
-// pages/crud/p1/index.vue
+// pages/http-signal/p1/index.vue
 // Composables を明示的にインポート
-import { useHttpPosts } from '~/composables/crud/p1/useHttpPosts'
+import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
 
 // Components を明示的にインポート
-import PostList from '~/components/crud/p1/PostList.vue'
+import PostList from '~/components/http-signal/p1/PostList.vue'
 
 // 型定義を明示的にインポート
-import type { Post } from '~/types/crud/p1/api'
+import type { Post } from '~/types/http-signal/p1/api'
 ```
 
 **メリット:**
@@ -207,10 +207,10 @@ import type { Post } from '~/types/crud/p1/api'
 
 ## 実装の流れ
 
-1. **型定義を作成** - `types/crud/p1/api.ts` で型を定義
-2. **Composable を作成** - `composables/crud/p1/useHttpPosts.ts` でロジックを分離
-3. **コンポーネントを作成** - `components/crud/p1/` で UI を分割
-4. **メインコンポーネントで統合** - `pages/crud/p1/index.vue` で全てを組み合わせる
+1. **型定義を作成** - `types/http-signal/p1/api.ts` で型を定義
+2. **Composable を作成** - `composables/http-signal/p1/useHttpPosts.ts` でロジックを分離
+3. **コンポーネントを作成** - `components/http-signal/p1/` で UI を分割
+4. **メインコンポーネントで統合** - `pages/http-signal/p1/index.vue` で全てを組み合わせる
 
 ## 使用技術
 
