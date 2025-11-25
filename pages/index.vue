@@ -15,7 +15,7 @@
 					</template>
 					<div class="space-y-4">
 						<p class="text-neutral-400">
-							非同期処理の基本を学習します（useFetch、async/await）
+							非同期処理の基本練習（useFetch、async/await）
 						</p>
 						<NuxtLink to="/async-await/p1">
 							<UButton color="primary" block> 練習ページへ </UButton>
@@ -32,7 +32,7 @@
 					</template>
 					<div class="space-y-4">
 						<p class="text-neutral-400">
-							CRUD操作を学習します（GET、POST、PUT、DELETE）
+							CRUD操作の練習（GET、POST、PUT、DELETE）
 						</p>
 						<NuxtLink to="/http-signal/p1">
 							<UButton color="primary" block> 練習ページへ </UButton>
@@ -49,9 +49,26 @@
 					</template>
 					<div class="space-y-4">
 						<p class="text-neutral-400">
-							配列操作を学習します（map、filter、reduce、find、ソート、ページネーション）
+							配列操作（map、filter、reduce、find、ソート、ページネーション）
 						</p>
 						<NuxtLink to="/array-operations/p1">
+							<UButton color="primary" block> 練習ページへ </UButton>
+						</NuxtLink>
+					</div>
+				</UCard>
+
+				<!-- crud-operations/p1 へのリンク -->
+				<UCard class="bg-neutral-950 hover:bg-neutral-800 transition-colors">
+					<template #header>
+						<h2 class="text-xl font-semibold text-neutral-100">
+							CRUD処理（実務用）
+						</h2>
+					</template>
+					<div class="space-y-4">
+						<p class="text-neutral-400">
+							API通信と配列操作を組み合わせた実践版（検索・フィルタ・ソート・ページネーション）
+						</p>
+						<NuxtLink to="/crud-operations/p1">
 							<UButton color="primary" block> 練習ページへ </UButton>
 						</NuxtLink>
 					</div>
