@@ -39,6 +39,23 @@
 						</NuxtLink>
 					</div>
 				</UCard>
+
+				<!-- array-operations/p1 へのリンク -->
+				<UCard class="bg-neutral-950 hover:bg-neutral-800 transition-colors">
+					<template #header>
+						<h2 class="text-xl font-semibold text-neutral-100">
+							配列操作の練習
+						</h2>
+					</template>
+					<div class="space-y-4">
+						<p class="text-neutral-400">
+							配列操作を学習します（map、filter、reduce、find、ソート、ページネーション）
+						</p>
+						<NuxtLink to="/array-operations/p1">
+							<UButton color="primary" block> 練習ページへ </UButton>
+						</NuxtLink>
+					</div>
+				</UCard>
 			</div>
 		</div>
 	</div>
