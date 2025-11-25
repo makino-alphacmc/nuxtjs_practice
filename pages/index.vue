@@ -73,6 +73,23 @@
 						</NuxtLink>
 					</div>
 				</UCard>
+
+				<!-- form-handling/p1 へのリンク -->
+				<UCard class="bg-neutral-950 hover:bg-neutral-800 transition-colors">
+					<template #header>
+						<h2 class="text-xl font-semibold text-neutral-100">
+							入力フォーム処理
+						</h2>
+					</template>
+					<div class="space-y-4">
+						<p class="text-neutral-400">
+							v-model、バリデーション、エラー表示、送信、リセット
+						</p>
+						<NuxtLink to="/form-handling/p1">
+							<UButton color="primary" block> 練習ページへ </UButton>
+						</NuxtLink>
+					</div>
+				</UCard>
 			</div>
 		</div>
 	</div>
