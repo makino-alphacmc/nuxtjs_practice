@@ -12,32 +12,31 @@ nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
 │   └── async-await/
 │       └── p1/
-│           └── api.ts
+│           └── api.ts                # User 型定義
 ├── composables/                      # Composables（必須）
 │   └── async-await/
 │       └── p1/
-│           └── useUser.ts
-├── components/                        # コンポーネント（必須）
+│           └── useUser.ts            # async/await を使ったユーザー取得ロジック
+├── components/                       # コンポーネント（必須）
 │   └── async-await/
 │       └── p1/
-│           └── UserInfo.vue
+│           └── UserInfo.vue          # ユーザー情報表示コンポーネント
 └── pages/
     └── async-await/
         ├── _docs/                    # マニュアルファイル
-        │   ├── s1_usefetch.md
-        │   ├── s2_async-try.md       # このファイル
-        │   ├── s3_promise.md
-        │   ├── s4_await.md
-        │   └── s5_error-handling.md
+        │   ├── README.md             # 全体構成の説明
+        │   ├── s1_usefetch.md        # useFetch の詳細解説
+        │   └── s2_async-try.md       # このファイル
         └── p1/                       # 実装例
             └── index.vue             # メインコンポーネント
 ```
 
-**実務で必須の 3 つの概念:**
+**実務で必須の 4 つの概念:**
 
 1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
 2. **コンポーネントの分割** - `components/async-await/p1/UserInfo.vue` で再利用性・保守性を向上
 3. **ロジックの分離** - `composables/async-await/p1/useUser.ts` で composables を活用
+4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
 ## 手動実装とは、なぜ必要なのか？
 
@@ -110,11 +109,12 @@ const load = async () => {
 
 ## 実装手順
 
-実務で必須の 3 つの概念を順番に実装していきます：
+実務で必須の 4 つの概念を順番に実装していきます：
 
 1. **型定義の明確化** - `any` の使用を減らす
 2. **ロジックの分離** - composables の活用
 3. **コンポーネントの分割** - 再利用性・保守性向上
+4. **明示的なインポート** - トラブル回避のため
 
 ### 1. 型定義の作成（必須）
 
@@ -220,8 +220,11 @@ export const useUser = (userId: number = 1) => {
 ```typescript
 // pages/async-await/p1/index.vue
 <script setup lang="ts">
-	// composable を使うことで、ロジックが再利用可能になる
-	const { loading, user, error, fetchUser } = useUser(1)
+// Composables を明示的にインポート
+import { useUser } from '~/composables/async-await/p1/useUser'
+
+// composable を使うことで、ロジックが再利用可能になる
+const { loading, user, error, fetchUser } = useUser(1)
 </script>
 ```
 
@@ -257,41 +260,51 @@ export const useUser = (userId: number = 1) => {
 </template>
 
 <script setup lang="ts">
-	// composable からデータを取得
-	const { loading, user, error, fetchUser } = useUser(1)
+// Composables を明示的にインポート
+import { useUser } from '~/composables/async-await/p1/useUser'
+
+// Components を明示的にインポート
+import UserInfo from '~/components/async-await/p1/UserInfo.vue'
+
+// composable からデータを取得
+const { loading, user, error, fetchUser } = useUser(1)
 </script>
 ```
 
-### 4. Template 部分の実装
+### 4. 明示的なインポート（トラブル回避）
 
-#### 4-1. ヘッダーと操作ボタン
-<template>
-	<UCard>
-		<template #header>
-			<h2>ユーザー情報</h2>
-		</template>
-		<div v-if="user && !loading">
-			<table class="w-full">
-				<!-- ユーザー情報テーブル -->
-			</table>
-		</div>
-	</UCard>
-</template>
+Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/async-await/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
 
+#### 4-1. 明示的なインポートの実装
+
+```typescript
+// pages/async-await/p1/index.vue
 <script setup lang="ts">
+// Composables を明示的にインポート
+// 注: composables/async-await/p1/ のような深い階層では自動インポートが機能しないため、明示的にインポートします
+import { useUser } from '~/composables/async-await/p1/useUser'
+
+// Components を明示的にインポート
+import UserInfo from '~/components/async-await/p1/UserInfo.vue'
+
+// 型定義を明示的にインポート
 import type { User } from '~/types/async-await/p1/api'
 
-interface Props {
-	user: User | null
-	loading: boolean
-	error: string | null
-}
-
-defineProps<Props>()
+// composable からデータを取得
+const { loading, user, error, fetchUser } = useUser(1)
 </script>
 ```
 
-#### 4-1. ヘッダーと操作ボタン
+**明示的なインポートのメリット：**
+
+- ✅ **確実性**: 自動インポートが機能しない場合でも確実に動作する
+- ✅ **可読性**: どこから来ているかが明確で、コードレビューがしやすい
+- ✅ **保守性**: 依存関係が明確で、リファクタリングが安全
+- ✅ **チーム開発**: チーム開発で混乱を避けられる
+
+### 5. Template 部分の実装
+
+#### 5-1. ヘッダーと操作ボタン
 
 ```vue
 <template #header>
@@ -317,7 +330,7 @@ defineProps<Props>()
 - `:loading="manualLoading"` で API 実行中は自動でスピナー表示に切り替え
 - `v-if / v-else` でボタンテキストも「取得」「取得中…」へ同期
 
-#### 4-2. ローディング状態の表示
+#### 5-2. ローディング状態の表示
 
 ```vue
 <div v-if="manualLoading" class="text-center py-8 text-neutral-400">
@@ -332,7 +345,7 @@ defineProps<Props>()
 - `animate-spin` を持つ円を描画し、視覚的に処理中であることを伝える
 - テキストも「読み込み中」と明示してユーザーに待機を促す
 
-#### 4-3. エラー状態の表示
+#### 5-3. エラー状態の表示
 
 ```vue
 <div
@@ -351,7 +364,7 @@ defineProps<Props>()
 - `{{ manualError }}` で catch 内で整形した詳細メッセージをそのまま提示
 - リトライボタンから同じ `fetchUserManually` を呼び、ユーザー自身が再実行できる
 
-#### 4-4. 結果テーブルの表示
+#### 5-4. 結果テーブルの表示
 
 ```vue
 <div v-if="manualUser && !manualLoading" class="overflow-x-auto">
@@ -398,7 +411,7 @@ defineProps<Props>()
 
 ## 実装の全体像
 
-このセクションでは、実務で必須の 3 つの概念を実装しました：
+このセクションでは、実務で必須の 4 つの概念を実装しました：
 
 ### 1. 型定義の明確化
 
@@ -467,4 +480,4 @@ export const useUser = () => {
 3. **コンポーネントを作成**: `components/async-await/p1/UserInfo.vue` で UI を分割
 4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
 
-このセクションでは、手動での非同期処理の実装方法と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。次のセクションでは、複数の API を並列で取得する方法を学びます。
+このセクションでは、手動での非同期処理の実装方法と、実務で必須の 4 つの概念（型定義・Composables・コンポーネント分割・明示的なインポート）を学びました。基本を理解したら、応用編（Promise.all、Sequential await、詳細なエラーハンドリング）に進むことができます。

@@ -9,32 +9,31 @@ nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
 │   └── async-await/
 │       └── p1/
-│           └── api.ts
+│           └── api.ts                # Post 型定義
 ├── composables/                      # Composables（必須）
 │   └── async-await/
 │       └── p1/
-│           └── usePosts.ts
-├── components/                        # コンポーネント（必須）
+│           └── usePosts.ts           # useFetch を使った投稿取得ロジック
+├── components/                       # コンポーネント（必須）
 │   └── async-await/
 │       └── p1/
-│           └── PostList.vue
+│           └── PostList.vue          # 投稿一覧表示コンポーネント
 └── pages/
     └── async-await/
         ├── _docs/                    # マニュアルファイル
+        │   ├── README.md             # 全体構成の説明
         │   ├── s1_usefetch.md       # このファイル
-        │   ├── s2_async-try.md
-        │   ├── s3_promise.md
-        │   ├── s4_await.md
-        │   └── s5_error-handling.md
+        │   └── s2_async-try.md       # async/await の詳細解説
         └── p1/                       # 実装例
             └── index.vue             # メインコンポーネント
 ```
 
-**実務で必須の 3 つの概念:**
+**実務で必須の 4 つの概念:**
 
 1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
 2. **コンポーネントの分割** - `components/async-await/p1/PostList.vue` で再利用性・保守性を向上
 3. **ロジックの分離** - `composables/async-await/p1/usePosts.ts` で composables を活用
+4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
 ## useFetch とは、なぜ必要なのか？
 
@@ -95,11 +94,12 @@ const { data, pending, error } = useFetch('https://api.example.com/data')
 
 ## 実装手順
 
-実務で必須の 3 つの概念を順番に実装していきます：
+実務で必須の 4 つの概念を順番に実装していきます：
 
 1. **型定義の明確化** - `any` の使用を減らす
-2. **コンポーネントの分割** - 再利用性・保守性向上
-3. **ロジックの分離** - composables の活用
+2. **ロジックの分離** - composables の活用
+3. **コンポーネントの分割** - 再利用性・保守性向上
+4. **明示的なインポート** - トラブル回避のため
 
 ### 1. 型定義の作成（必須）
 
@@ -222,9 +222,12 @@ export const usePosts = () => {
 
 ```typescript
 // pages/async-await/p1/index.vue
-<script setup lang='ts'>
-	// composable を使うことで、ロジックが再利用可能になる const{' '}
-	{(posts, postsPending, postsError)} = usePosts()
+<script setup lang="ts">
+// Composables を明示的にインポート
+import { usePosts } from '~/composables/async-await/p1/usePosts'
+
+// composable を使うことで、ロジックが再利用可能になる
+const { posts, postsPending, postsError } = usePosts()
 </script>
 ```
 
@@ -291,14 +294,51 @@ defineProps<Props>()
 </template>
 
 <script setup lang="ts">
+// Composables を明示的にインポート
+import { usePosts } from '~/composables/async-await/p1/usePosts'
+
+// Components を明示的にインポート
+import PostList from '~/components/async-await/p1/PostList.vue'
+
 // composable からデータを取得
 const { posts, postsPending, postsError } = usePosts()
 </script>
 ```
 
-### 4. Template 部分の実装
+### 4. 明示的なインポート（トラブル回避）
 
-#### 4-1. ヘッダー部分
+Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/async-await/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
+
+#### 4-1. 明示的なインポートの実装
+
+```typescript
+// pages/async-await/p1/index.vue
+<script setup lang="ts">
+// Composables を明示的にインポート
+// 注: composables/async-await/p1/ のような深い階層では自動インポートが機能しないため、明示的にインポートします
+import { usePosts } from '~/composables/async-await/p1/usePosts'
+
+// Components を明示的にインポート
+import PostList from '~/components/async-await/p1/PostList.vue'
+
+// 型定義を明示的にインポート
+import type { Post } from '~/types/async-await/p1/api'
+
+// composable からデータを取得
+const { posts, postsPending, postsError } = usePosts()
+</script>
+```
+
+**明示的なインポートのメリット：**
+
+- ✅ **確実性**: 自動インポートが機能しない場合でも確実に動作する
+- ✅ **可読性**: どこから来ているかが明確で、コードレビューがしやすい
+- ✅ **保守性**: 依存関係が明確で、リファクタリングが安全
+- ✅ **チーム開発**: チーム開発で混乱を避けられる
+
+### 5. Template 部分の実装
+
+#### 5-1. ヘッダー部分
 
 ```vue
 <template #header>
@@ -319,7 +359,7 @@ const { posts, postsPending, postsError } = usePosts()
 - `v-if="posts && !postsPending"`: データが存在し、かつローディング中でない場合のみ表示
 - `posts.length`: 取得した投稿データの配列の長さ（件数）を表示
 
-#### 4-2. ローディング状態の表示
+#### 5-2. ローディング状態の表示
 
 ```vue
 <!-- ローディング状態 -->
@@ -337,7 +377,7 @@ const { posts, postsPending, postsError } = usePosts()
 - `animate-spin`: Tailwind CSS のアニメーションクラスで、要素を回転させる
 - ユーザーにデータ取得中であることを視覚的に伝える
 
-#### 4-3. エラー状態の表示
+#### 5-3. エラー状態の表示
 
 ```vue
 <!-- エラー状態 -->
@@ -355,7 +395,7 @@ const { posts, postsPending, postsError } = usePosts()
 - `postsError.message`: エラーオブジェクトの`message`プロパティを表示
 - 赤色の背景とボーダーでエラーであることを視覚的に強調
 
-#### 4-4. データテーブルの表示
+#### 5-4. データテーブルの表示
 
 ```vue
 <!-- データテーブル表示 -->
@@ -418,7 +458,7 @@ const { posts, postsPending, postsError } = usePosts()
 
 ## 実装の全体像
 
-このセクションでは、実務で必須の 3 つの概念を実装しました：
+このセクションでは、実務で必須の 4 つの概念を実装しました：
 
 ### 1. 型定義の明確化
 
@@ -487,4 +527,4 @@ export const usePosts = () => {
 3. **コンポーネントを作成**: `components/async-await/p1/PostList.vue` で UI を分割
 4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
 
-このセクションでは、`useFetch`の基本的な使い方と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。次のセクションでは、より細かい制御が必要な場合の手動実装方法を学びます。
+このセクションでは、`useFetch`の基本的な使い方と、実務で必須の 4 つの概念（型定義・Composables・コンポーネント分割・明示的なインポート）を学びました。次のセクションでは、より細かい制御が必要な場合の手動実装方法を学びます。
