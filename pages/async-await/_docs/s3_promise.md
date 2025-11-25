@@ -3,6 +3,42 @@
 > **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
 > JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。投稿（posts）、ユーザー（users）、コメント（comments）などのサンプルデータを提供しており、複数の API を同時に呼び出す並列処理の学習に最適です。
 
+## フォルダ構成
+
+このセクションで使用するファイル構成は以下の通りです：
+
+```
+nuxtjs_practice/
+├── types/                            # 型定義ファイル（必須）
+│   └── async-await/
+│       └── p1/
+│           └── api.ts
+├── composables/                      # Composables（必須）
+│   └── async-await/
+│       └── p1/
+│           └── useParallelData.ts
+├── components/                        # コンポーネント（必須）
+│   └── async-await/
+│       └── p1/
+│           └── ParallelDataCards.vue
+└── pages/
+    └── async-await/
+        ├── _docs/                    # マニュアルファイル
+        │   ├── s1_usefetch.md
+        │   ├── s2_async-try.md
+        │   ├── s3_promise.md         # このファイル
+        │   ├── s4_await.md
+        │   └── s5_error-handling.md
+        └── p1/                       # 実装例
+            └── index.vue             # メインコンポーネント
+```
+
+**実務で必須の 3 つの概念:**
+
+1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
+2. **コンポーネントの分割** - `components/async-await/p1/ParallelDataCards.vue` で再利用性・保守性を向上
+3. **ロジックの分離** - `composables/async-await/p1/useParallelData.ts` で composables を活用
+
 ## Promise.all とは、なぜ必要なのか？
 
 ### Promise.all とは
@@ -61,66 +97,198 @@ const [posts, users] = await Promise.all([
 
 ## 実装手順
 
-### 1. Script 部分の実装
+実務で必須の 3 つの概念を順番に実装していきます：
+
+1. **型定義の明確化** - `any` の使用を減らす
+2. **ロジックの分離** - composables の活用
+3. **コンポーネントの分割** - 再利用性・保守性向上
+
+### 1. 型定義の作成（必須）
+
+`any` を使わずに**型定義を明確に**することが重要です。これにより、IDE の補完機能が働き、実行時エラーを防ぐことができます。
+
+#### 1-1. 型定義ファイルの作成
 
 ```typescript
-// ============================================================
-// セクション3: Promise.all で複数データを並列取得
-// ============================================================
-const parallelLoading = ref(false) // 並列取得の進行状況
-const parallelData = ref<any>(null) // 投稿・ユーザー・コメントをまとめて保持
-const parallelError = ref<string | null>(null) // 失敗時のメッセージ
+// types/async-await/p1/api.ts
+export interface Post {
+	id: number
+	title: string
+	body: string
+	userId: number
+}
 
-const fetchMultipleData = async () => {
-	parallelData.value = null // 古い結果を破棄
-	parallelError.value = null // 直前のエラーをクリア
-	parallelLoading.value = true // ここからローディング開始
+export interface User {
+	id: number
+	name: string
+	email: string
+	address?: {
+		city: string
+	}
+}
 
-	const startTime = Date.now() // 所要時間を測定するための開始時刻
+export interface Comment {
+	id: number
+	name: string
+	body: string
+}
 
-	try {
-		const [postRes, userRes, commentRes] = await Promise.all([
-			fetch('https://jsonplaceholder.typicode.com/posts/1'),
-			fetch('https://jsonplaceholder.typicode.com/users/1'),
-			fetch('https://jsonplaceholder.typicode.com/comments/1'),
-		]) // 3 本のリクエストを並列で投げる
+export interface ParallelData {
+	post: Post
+	user: User
+	comment: Comment
+	duration: number
+}
+```
 
-		if (!postRes.ok || !userRes.ok || !commentRes.ok) {
-			throw new Error('一部のリクエストが失敗しました') // HTTP ステータスを自前チェック
+#### 1-2. 型定義の使用
+
+```typescript
+import type { Post, User, Comment, ParallelData } from '~/types/async-await/p1/api'
+```
+
+**型定義のメリット：**
+
+- IDE が自動補完してくれる（`data.value.post.title` など）
+- タイポをコンパイル時に検出できる
+- チーム開発でデータ構造が明確になる
+- リファクタリングが安全にできる
+
+### 2. ロジックの分離（Composables の活用）
+
+ロジックを**composables**に分離することで、再利用性と保守性が向上します。
+
+#### 2-1. composables/useParallelData.ts の作成
+
+```typescript
+// composables/async-await/p1/useParallelData.ts
+import type { Post, User, Comment, ParallelData } from '~/types/async-await/p1/api'
+
+export const useParallelData = () => {
+	const loading = ref(false)
+	const data = ref<ParallelData | null>(null)
+	const error = ref<string | null>(null)
+
+	const fetchMultipleData = async () => {
+		data.value = null
+		error.value = null
+		loading.value = true
+
+		const startTime = Date.now()
+
+		try {
+			const [postRes, userRes, commentRes] = await Promise.all([
+				fetch('https://jsonplaceholder.typicode.com/posts/1'),
+				fetch('https://jsonplaceholder.typicode.com/users/1'),
+				fetch('https://jsonplaceholder.typicode.com/comments/1'),
+			])
+
+			if (!postRes.ok || !userRes.ok || !commentRes.ok) {
+				throw new Error('一部のリクエストが失敗しました')
+			}
+
+			const [post, user, comment] = await Promise.all([
+				postRes.json() as Promise<Post>,
+				userRes.json() as Promise<User>,
+				commentRes.json() as Promise<Comment>,
+			])
+
+			const duration = Date.now() - startTime
+			data.value = { post, user, comment, duration }
+		} catch (err) {
+			error.value = err instanceof Error ? err.message : '不明なエラー'
+			console.error('並列処理エラー:', err)
+		} finally {
+			loading.value = false
 		}
+	}
 
-		const [post, user, comment] = await Promise.all([
-			postRes.json(),
-			userRes.json(),
-			commentRes.json(),
-		]) // レスポンスの JSON 変換も並列化
-
-		const duration = Date.now() - startTime // 全体の処理時間を計測
-
-		parallelData.value = { post, user, comment, duration } // UI で扱いやすい形にまとめる
-	} catch (error) {
-		parallelError.value =
-			error instanceof Error ? error.message : '不明なエラー'
-		console.error('並列処理エラー:', error) // ログで詳細を追えるようにする
-	} finally {
-		parallelLoading.value = false // 成功・失敗どちらでもローディング終了
+	return {
+		loading,
+		data,
+		error,
+		fetchMultipleData,
 	}
 }
 ```
 
-**コードの説明：**
+**Composables のメリット：**
 
-- `parallelLoading / parallelData / parallelError`: 並列処理専用の状態を分離して UI 連携を明確化
-- `Promise.all([...fetch()])`: リクエストを同時送信し、配列でレスポンスを受け取る
-- `if (!response.ok) throw ...`: Fetch は HTTP 400/500 でも reject しないため、ここで例外化して catch に流す
-- `Promise.all([...res.json()])`: JSON 変換も並列化することで無駄な待ち時間をなくす
-- `duration`: 実際の効果が目に見えるよう、かかった時間をミリ秒で計測・保存
-- `catch`: 例外オブジェクトをユーザー向け文字列に変換し、同時に console へ詳細ログ
-- `finally`: UI を必ず通常状態へ戻すための安全弁
+- ✅ **再利用性**: 複数のページで同じロジックを使える
+- ✅ **テスト容易性**: ロジックだけをテストできる
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: コンポーネントがシンプルになる
 
-### 2. Template 部分の実装
+#### 2-2. コンポーネントでの使用
 
-#### 2-1. ヘッダーと操作ボタン
+```typescript
+// pages/async-await/p1/index.vue
+<script setup lang="ts">
+	// composable を使うことで、ロジックが再利用可能になる
+	const { loading, data, error, fetchMultipleData } = useParallelData()
+</script>
+```
+
+### 3. コンポーネントの分割（再利用性・保守性向上）
+
+大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
+
+#### 3-1. components/ParallelDataCards.vue の作成
+
+```vue
+<!-- components/async-await/p1/ParallelDataCards.vue -->
+
+**コンポーネント分割のメリット：**
+
+- ✅ **再利用性**: 複数のページで同じ UI を使える
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: ファイルが小さくなり、理解しやすくなる
+- ✅ **テスト容易性**: コンポーネント単位でテストできる
+
+#### 3-2. 親コンポーネントでの使用
+
+```vue
+<!-- pages/async-await/p1/index.vue -->
+<template>
+	<div>
+		<ParallelDataCards
+			:data="data"
+			:loading="loading"
+			:error="error"
+			@fetch="fetchMultipleData"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+	// composable からデータを取得
+	const { loading, data, error, fetchMultipleData } = useParallelData()
+</script>
+```
+
+### 4. Template 部分の実装
+
+#### 4-1. ヘッダーと操作ボタン
+<template>
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<DataCard title="投稿データ" :data="data?.post" />
+		<DataCard title="ユーザー情報" :data="data?.user" />
+		<DataCard title="コメント" :data="data?.comment" />
+	</div>
+</template>
+
+<script setup lang="ts">
+import type { ParallelData } from '~/types/async-await/p1/api'
+
+interface Props {
+	data: ParallelData | null
+}
+
+defineProps<Props>()
+</script>
+```
+
+#### 4-1. ヘッダーと操作ボタン
 
 ```vue
 <template #header>
@@ -154,7 +322,7 @@ const fetchMultipleData = async () => {
 - `UButton` はセクション 1・2 と同じローディング挙動で統一感を維持
 - ボタンを押すと毎回 `fetchMultipleData` が最初から実行される
 
-#### 2-2. ローディング状態
+#### 4-2. ローディング状態
 
 ```vue
 <div v-if="parallelLoading" class="text-center py-8 text-neutral-400">
@@ -168,7 +336,7 @@ const fetchMultipleData = async () => {
 - 並列処理中のみスピナーを表示し、ユーザーに処理中であることを伝える
 - 文言を「複数のデータ」と明示して、ボタンアクションと対応づけている
 
-#### 2-3. エラー表示
+#### 4-3. エラー表示
 
 ```vue
 <div
@@ -187,7 +355,7 @@ const fetchMultipleData = async () => {
 - catch で整形したメッセージをそのまま提示し、原因をユーザーに共有
 - 小さめのリトライボタンで再実行を促す
 
-#### 2-4. 並列取得結果のカード表示
+#### 4-4. 並列取得結果のカード表示
 
 ```vue
 <div v-if="parallelData && !parallelLoading" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
@@ -227,9 +395,75 @@ const fetchMultipleData = async () => {
 - 各カードが `post / user / comment` を 1 対 1 で表示し、「同時に取得した」感覚を演出
 - `line-clamp` や `font-medium` で読みやすさと情報量のバランスを調整
 
+## 実装の全体像
+
+このセクションでは、実務で必須の 3 つの概念を実装しました：
+
+### 1. 型定義の明確化
+
+```typescript
+// types/async-await/p1/api.ts
+export interface ParallelData {
+	post: Post
+	user: User
+	comment: Comment
+	duration: number
+}
+```
+
+**メリット：**
+
+- `any` の使用を減らし、実行時エラーを防ぐ
+- IDE の補完機能が働く
+- チーム開発でデータ構造が明確になる
+
+### 2. ロジックの分離（Composables）
+
+```typescript
+// composables/async-await/p1/useParallelData.ts
+export const useParallelData = () => {
+	const { loading, data, error, fetchMultipleData } = ...
+	return { loading, data, error, fetchMultipleData }
+}
+```
+
+**メリット：**
+
+- コードの重複を防ぐ
+- ロジックのテストが容易になる
+- 変更が一箇所で済む
+
+### 3. コンポーネントの分割
+
+```vue
+<!-- components/async-await/p1/ParallelDataCards.vue -->
+<template>
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<!-- 並列取得結果のカード表示 -->
+	</div>
+</template>
+```
+
+**メリット：**
+
+- ファイルが肥大化するのを防ぐ
+- 再利用性が向上する
+- 保守性が向上する
+
 ## まとめ
 
-1. **Promise.all は「同時に投げてまとめて待つ」ための基本テクニック**で、体感速度が大きく向上する
-2. **レスポンスごとに `.ok` を確認し、問題があれば自前で `throw`** することで統一的なエラーハンドリングが可能
-3. **所要時間やカード表示など、UI で効果を見せる仕掛け**を入れると学習・デバッグがしやすい
-4. このパターンを押さえておけば、API が増えても横展開しやすく、次章の順次処理との違いも明確に理解できる
+`Promise.all`を使うことで、以下のメリットが得られます：
+
+1. **体感速度の向上**: 複数の API を同時に実行し、「一番遅い API の時間」しか待たない
+2. **コードの簡潔化**: `try/catch` を 1 箇所にまとめ、成功時・失敗時の処理を一本化
+3. **エラー検知の容易さ**: どれかが失敗した時点で一括で `catch` に飛ばせる
+4. **保守性の向上**: 型定義と Composables を活用することで、複数の API を扱うコードも安全に管理できる
+
+### 実装の流れ
+
+1. **型定義を作成**: `types/async-await/p1/api.ts` で型を定義
+2. **Composable を作成**: `composables/async-await/p1/useParallelData.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/async-await/p1/ParallelDataCards.vue` で UI を分割
+4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
+
+このセクションでは、`Promise.all`を使った並列処理の実装方法と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。次のセクションでは、順次処理（await の連続）を学びます。

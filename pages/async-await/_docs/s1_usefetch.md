@@ -1,5 +1,41 @@
 # セクション 1: useFetch を使った基本的な API 通信
 
+## フォルダ構成
+
+このセクションで使用するファイル構成は以下の通りです：
+
+```
+nuxtjs_practice/
+├── types/                            # 型定義ファイル（必須）
+│   └── async-await/
+│       └── p1/
+│           └── api.ts
+├── composables/                      # Composables（必須）
+│   └── async-await/
+│       └── p1/
+│           └── usePosts.ts
+├── components/                        # コンポーネント（必須）
+│   └── async-await/
+│       └── p1/
+│           └── PostList.vue
+└── pages/
+    └── async-await/
+        ├── _docs/                    # マニュアルファイル
+        │   ├── s1_usefetch.md       # このファイル
+        │   ├── s2_async-try.md
+        │   ├── s3_promise.md
+        │   ├── s4_await.md
+        │   └── s5_error-handling.md
+        └── p1/                       # 実装例
+            └── index.vue             # メインコンポーネント
+```
+
+**実務で必須の 3 つの概念:**
+
+1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
+2. **コンポーネントの分割** - `components/async-await/p1/PostList.vue` で再利用性・保守性を向上
+3. **ロジックの分離** - `composables/async-await/p1/usePosts.ts` で composables を活用
+
 ## useFetch とは、なぜ必要なのか？
 
 ### useFetch とは
@@ -59,31 +95,210 @@ const { data, pending, error } = useFetch('https://api.example.com/data')
 
 ## 実装手順
 
-### 1. Script 部分の実装
+実務で必須の 3 つの概念を順番に実装していきます：
+
+1. **型定義の明確化** - `any` の使用を減らす
+2. **コンポーネントの分割** - 再利用性・保守性向上
+3. **ロジックの分離** - composables の活用
+
+### 1. 型定義の作成（必須）
+
+`any` を使わずに**型定義を明確に**することが重要です。これにより、IDE の補完機能が働き、実行時エラーを防ぐことができます。
+
+#### 1-1. 型定義ファイルの作成
+
+まず、型定義を格納するファイルを作成します：
 
 ```typescript
-// ============================================================
-// セクション1: useFetch を使った基本的なAPI通信
-// ============================================================
-// useFetch は Nuxt の便利な composable で、自動的にローディング状態と
-// エラー状態を管理してくれます。
-const {
-	data: posts, // 取得したデータを格納する変数（postsという名前で使用）
-	pending: postsPending, // ローディング中かどうかを示すフラグ
-	error: postsError, // エラー情報を格納する変数
-} = useFetch('https://jsonplaceholder.typicode.com/posts') // APIのエンドポイントURL
+// types/async-await/p1/api.ts
+export interface Post {
+	id: number
+	title: string
+	body: string
+	userId: number
+}
+
+export interface User {
+	id: number
+	name: string
+	username: string
+	email: string
+	phone?: string
+	website?: string
+	address?: {
+		street: string
+		city: string
+		zipcode: string
+	}
+	company?: {
+		name: string
+		catchPhrase?: string
+	}
+}
 ```
 
-**コードの説明：**
+**なぜ型定義が必要か？**
 
-- `useFetch('https://jsonplaceholder.typicode.com/posts')`: JSONPlaceholder API から投稿データを取得
-- `data: posts`: 取得したデータを`posts`という名前で使用できるようにエイリアスを設定
-- `pending: postsPending`: データ取得中かどうかを示すフラグを`postsPending`という名前で使用
-- `error: postsError`: エラーが発生した場合の情報を`postsError`に格納
+- ❌ **`any` を使った場合**:
 
-### 2. Template 部分の実装
+  ```typescript
+  const posts = ref<any>(null)
+  posts.value.title // エラーが出ないが、実行時に undefined の可能性
+  posts.value.titl // タイポしてもエラーが出ない
+  ```
 
-#### 2-1. ヘッダー部分
+- ✅ **型定義を使った場合**:
+  ```typescript
+  const posts = ref<Post[] | null>(null)
+  posts.value[0].title // ✅ IDE が補完してくれる
+  posts.value[0].titl // ❌ コンパイルエラー！タイポを検出
+  ```
+
+#### 1-2. 型定義の使用
+
+```typescript
+import type { Post } from '~/types/async-await/p1/api'
+
+// useFetch に型を指定
+const { data: posts } = useFetch<Post[]>(
+	'https://jsonplaceholder.typicode.com/posts'
+)
+```
+
+**型定義のメリット：**
+
+- IDE が自動補完してくれる（`posts.value[0].title` など）
+- タイポをコンパイル時に検出できる
+- チーム開発でデータ構造が明確になる
+- リファクタリングが安全にできる
+
+### 2. ロジックの分離（Composables の活用）
+
+ロジックを**composables**に分離することで、再利用性と保守性が向上します。
+
+#### 2-1. composables/usePosts.ts の作成
+
+```typescript
+// composables/async-await/p1/usePosts.ts
+import type { Post } from '~/types/async-await/p1/api'
+
+export const usePosts = () => {
+	const {
+		data: posts,
+		pending: postsPending,
+		error: postsError,
+		refresh: refreshPosts,
+	} = useFetch<Post[]>('https://jsonplaceholder.typicode.com/posts')
+
+	// 投稿を ID で検索する関数
+	const getPostById = (id: number) => {
+		return posts.value?.find((post) => post.id === id)
+	}
+
+	// 投稿をユーザー ID でフィルタする関数
+	const getPostsByUserId = (userId: number) => {
+		return posts.value?.filter((post) => post.userId === userId) || []
+	}
+
+	return {
+		posts,
+		postsPending,
+		postsError,
+		refreshPosts,
+		getPostById,
+		getPostsByUserId,
+	}
+}
+```
+
+**Composables のメリット：**
+
+- ✅ **再利用性**: 複数のページで同じロジックを使える
+- ✅ **テスト容易性**: ロジックだけをテストできる
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: コンポーネントがシンプルになる
+
+#### 2-2. コンポーネントでの使用
+
+```typescript
+// pages/async-await/p1/index.vue
+<script setup lang='ts'>
+	// composable を使うことで、ロジックが再利用可能になる const{' '}
+	{(posts, postsPending, postsError)} = usePosts()
+</script>
+```
+
+### 3. コンポーネントの分割（再利用性・保守性向上）
+
+大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
+
+**分割の基準：**
+
+- **単一責任の原則**: 1 つのコンポーネント = 1 つの役割
+- **再利用性**: 2 箇所以上で使う → コンポーネント化
+- **ファイルサイズ**: 200-300 行を超えたら分割を検討
+
+#### 3-1. components/PostList.vue の作成
+
+```vue
+<!-- components/async-await/p1/PostList.vue -->
+<template>
+	<UCard>
+		<template #header>
+			<div class="flex items-center justify-between">
+				<h2 class="text-xl font-semibold text-neutral-100">投稿データ一覧</h2>
+				<div v-if="posts && !postsPending" class="text-sm text-neutral-400">
+					全{{ posts.length }}件
+				</div>
+			</div>
+		</template>
+		<!-- ローディング、エラー、テーブル表示 -->
+	</UCard>
+</template>
+
+<script setup lang="ts">
+import type { Post } from '~/types/async-await/p1/api'
+
+interface Props {
+	posts: Post[] | null
+	postsPending: boolean
+	postsError: Error | null
+}
+
+defineProps<Props>()
+</script>
+```
+
+**コンポーネント分割のメリット：**
+
+- ✅ **再利用性**: 複数のページで同じ UI を使える
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: ファイルが小さくなり、理解しやすくなる
+- ✅ **テスト容易性**: コンポーネント単位でテストできる
+
+#### 3-2. 親コンポーネントでの使用
+
+```vue
+<!-- pages/async-await/p1/index.vue -->
+<template>
+	<div>
+		<PostList
+			:posts="posts"
+			:posts-pending="postsPending"
+			:posts-error="postsError"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+// composable からデータを取得
+const { posts, postsPending, postsError } = usePosts()
+</script>
+```
+
+### 4. Template 部分の実装
+
+#### 4-1. ヘッダー部分
 
 ```vue
 <template #header>
@@ -104,7 +319,7 @@ const {
 - `v-if="posts && !postsPending"`: データが存在し、かつローディング中でない場合のみ表示
 - `posts.length`: 取得した投稿データの配列の長さ（件数）を表示
 
-#### 2-2. ローディング状態の表示
+#### 4-2. ローディング状態の表示
 
 ```vue
 <!-- ローディング状態 -->
@@ -122,7 +337,7 @@ const {
 - `animate-spin`: Tailwind CSS のアニメーションクラスで、要素を回転させる
 - ユーザーにデータ取得中であることを視覚的に伝える
 
-#### 2-3. エラー状態の表示
+#### 4-3. エラー状態の表示
 
 ```vue
 <!-- エラー状態 -->
@@ -140,7 +355,7 @@ const {
 - `postsError.message`: エラーオブジェクトの`message`プロパティを表示
 - 赤色の背景とボーダーでエラーであることを視覚的に強調
 
-#### 2-4. データテーブルの表示
+#### 4-4. データテーブルの表示
 
 ```vue
 <!-- データテーブル表示 -->
@@ -201,6 +416,61 @@ const {
 - `{{ post.userId }}`: 各投稿のユーザー ID を表示
 - `truncate`: Tailwind CSS のクラスで、長いテキストを省略記号（...）で表示
 
+## 実装の全体像
+
+このセクションでは、実務で必須の 3 つの概念を実装しました：
+
+### 1. 型定義の明確化
+
+```typescript
+// types/async-await/p1/api.ts
+export interface Post {
+	id: number
+	title: string
+	body: string
+	userId: number
+}
+```
+
+**メリット：**
+
+- `any` の使用を減らし、実行時エラーを防ぐ
+- IDE の補完機能が働く
+- チーム開発でデータ構造が明確になる
+
+### 2. ロジックの分離（Composables）
+
+```typescript
+// composables/async-await/p1/usePosts.ts
+export const usePosts = () => {
+	const { data: posts, pending, error } = useFetch<Post[]>('https://...')
+	return { posts, pending, error }
+}
+```
+
+**メリット：**
+
+- コードの重複を防ぐ
+- ロジックのテストが容易になる
+- 変更が一箇所で済む
+
+### 3. コンポーネントの分割
+
+```vue
+<!-- components/async-await/p1/PostList.vue -->
+<template>
+	<UCard>
+		<!-- 投稿一覧のUI -->
+	</UCard>
+</template>
+```
+
+**メリット：**
+
+- ファイルが肥大化するのを防ぐ
+- 再利用性が向上する
+- 保守性が向上する
+
 ## まとめ
 
 `useFetch`を使うことで、以下のメリットが得られます：
@@ -210,4 +480,11 @@ const {
 3. **保守性の向上**: Nuxt が推奨する方法なので、将来的な変更にも対応しやすい
 4. **SSR 対応**: サーバーサイドレンダリングでも自動的に動作
 
-このセクションでは、`useFetch`の基本的な使い方を学びました。次のセクションでは、より細かい制御が必要な場合の手動実装方法を学びます。
+### 実装の流れ
+
+1. **型定義を作成**: `types/async-await/p1/api.ts` で型を定義
+2. **Composable を作成**: `composables/async-await/p1/usePosts.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/async-await/p1/PostList.vue` で UI を分割
+4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
+
+このセクションでは、`useFetch`の基本的な使い方と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。次のセクションでは、より細かい制御が必要な場合の手動実装方法を学びます。

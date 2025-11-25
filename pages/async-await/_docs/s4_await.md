@@ -3,6 +3,42 @@
 > **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
 > JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。投稿（posts）とユーザー（users）を順番に取得する順次処理の学習に最適です。
 
+## フォルダ構成
+
+このセクションで使用するファイル構成は以下の通りです：
+
+```
+nuxtjs_practice/
+├── types/                            # 型定義ファイル（必須）
+│   └── async-await/
+│       └── p1/
+│           └── api.ts
+├── composables/                      # Composables（必須）
+│   └── async-await/
+│       └── p1/
+│           └── useSequentialData.ts
+├── components/                        # コンポーネント（必須）
+│   └── async-await/
+│       └── p1/
+│           └── SequentialSteps.vue
+└── pages/
+    └── async-await/
+        ├── _docs/                    # マニュアルファイル
+        │   ├── s1_usefetch.md
+        │   ├── s2_async-try.md
+        │   ├── s3_promise.md
+        │   ├── s4_await.md           # このファイル
+        │   └── s5_error-handling.md
+        └── p1/                       # 実装例
+            └── index.vue             # メインコンポーネント
+```
+
+**実務で必須の 3 つの概念:**
+
+1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
+2. **コンポーネントの分割** - `components/async-await/p1/SequentialSteps.vue` で再利用性・保守性を向上
+3. **ロジックの分離** - `composables/async-await/p1/useSequentialData.ts` で composables を活用
+
 ## 順次実行とは、なぜ必要なのか？
 
 ### 順次実行とは
@@ -56,58 +92,187 @@ const runSteps = async () => {
 
 ## 実装手順
 
-### 1. Script 部分の実装
+実務で必須の 3 つの概念を順番に実装していきます：
+
+1. **型定義の明確化** - `any` の使用を減らす
+2. **ロジックの分離** - composables の活用
+3. **コンポーネントの分割** - 再利用性・保守性向上
+
+### 1. 型定義の作成（必須）
+
+`any` を使わずに**型定義を明確に**することが重要です。これにより、IDE の補完機能が働き、実行時エラーを防ぐことができます。
+
+#### 1-1. 型定義ファイルの作成
 
 ```typescript
-// ============================================================
-// セクション4: await を連続させた順次データ取得
-// ============================================================
-const sequentialLoading = ref(false) // 順次処理のローディング状態
-const sequentialData = ref<any>(null) // 投稿とユーザーの結果をまとめる
-const sequentialError = ref<string | null>(null) // 表示用のエラーメッセージ
+// types/async-await/p1/api.ts
+export interface Post {
+	id: number
+	title: string
+	body: string
+	userId: number
+}
 
-const fetchSequentially = async () => {
-	sequentialData.value = null // 以前の結果をクリア
-	sequentialError.value = null // 前回のエラーをクリア
-	sequentialLoading.value = true // 処理開始を UI に通知
+export interface User {
+	id: number
+	name: string
+	email: string
+}
 
-	const startTime = Date.now() // 並列処理との差を測るため開始時間を記録
+export interface SequentialData {
+	post: Post
+	user: User
+	duration: number
+}
+```
 
-	try {
-		const postRes = await fetch('https://jsonplaceholder.typicode.com/posts/1') // ステップ1: 投稿取得
-		if (!postRes.ok) throw new Error('投稿の取得に失敗しました') // HTTP ステータスを毎回チェック
-		const post = await postRes.json() // 投稿データを JSON 化
+#### 1-2. 型定義の使用
 
-		const userRes = await fetch('https://jsonplaceholder.typicode.com/users/1') // ステップ2: ユーザー取得
-		if (!userRes.ok) throw new Error('ユーザーの取得に失敗しました')
-		const user = await userRes.json() // ユーザーデータを JSON 化
+```typescript
+import type { Post, User, SequentialData } from '~/types/async-await/p1/api'
+```
 
-		const duration = Date.now() - startTime // 全体の処理時間を算出
-		sequentialData.value = { post, user, duration } // 画面表示しやすい構造にまとめる
-	} catch (error) {
-		sequentialError.value =
-			error instanceof Error ? error.message : '不明なエラー'
-		console.error('順次処理エラー:', error) // 失敗箇所のヒントをログに残す
-	} finally {
-		sequentialLoading.value = false // 成功・失敗どちらでもローディング終了
+**型定義のメリット：**
+
+- IDE が自動補完してくれる（`data.value.post.title` など）
+- タイポをコンパイル時に検出できる
+- チーム開発でデータ構造が明確になる
+- リファクタリングが安全にできる
+
+### 2. ロジックの分離（Composables の活用）
+
+ロジックを**composables**に分離することで、再利用性と保守性が向上します。
+
+#### 2-1. composables/useSequentialData.ts の作成
+
+```typescript
+// composables/async-await/p1/useSequentialData.ts
+import type { Post, User, SequentialData } from '~/types/async-await/p1/api'
+
+export const useSequentialData = () => {
+	const loading = ref(false)
+	const data = ref<SequentialData | null>(null)
+	const error = ref<string | null>(null)
+
+	const fetchSequentially = async () => {
+		data.value = null
+		error.value = null
+		loading.value = true
+
+		const startTime = Date.now()
+
+		try {
+			const postRes = await fetch(
+				'https://jsonplaceholder.typicode.com/posts/1'
+			)
+			if (!postRes.ok) throw new Error('投稿の取得に失敗しました')
+			const post = (await postRes.json()) as Post
+
+			const userRes = await fetch(
+				'https://jsonplaceholder.typicode.com/users/1'
+			)
+			if (!userRes.ok) throw new Error('ユーザーの取得に失敗しました')
+			const user = (await userRes.json()) as User
+
+			const duration = Date.now() - startTime
+			data.value = { post, user, duration }
+		} catch (err) {
+			error.value = err instanceof Error ? err.message : '不明なエラー'
+			console.error('順次処理エラー:', err)
+		} finally {
+			loading.value = false
+		}
+	}
+
+	return {
+		loading,
+		data,
+		error,
+		fetchSequentially,
 	}
 }
 ```
 
-**コードの説明：**
+**Composables のメリット：**
 
-- `sequentialLoading / sequentialData / sequentialError`: 順次処理専用の状態を切り分け、UI と同期
-- `await fetch('https://jsonplaceholder.typicode.com/posts/1')`: JSONPlaceholder の投稿 API を呼び出し。ID 1 の投稿を取得します
-- `await fetch('https://jsonplaceholder.typicode.com/users/1')`: JSONPlaceholder のユーザー API を呼び出し。ID 1 のユーザー情報を取得します
-- `await fetch(...)` を 2 回に分けて記述し、処理の依存関係を明示（投稿取得が完了してからユーザー取得を開始）
-- それぞれのレスポンスで `.ok` を確認し、失敗時は即例外化して後続ステップを止める
-- `duration` を保存することで、セクション 3 の並列取得との速度差を比較できる
-- `catch` ではユーザー向け文言とログ出力を分け、UX とデバッグの両立を図る
-- `finally` で UI を必ず元に戻し、ダブルクリックなどの誤操作を防ぐ
+- ✅ **再利用性**: 複数のページで同じロジックを使える
+- ✅ **テスト容易性**: ロジックだけをテストできる
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: コンポーネントがシンプルになる
 
-### 2. Template 部分の実装
+#### 2-2. コンポーネントでの使用
 
-#### 2-1. ヘッダーと操作ボタン
+```typescript
+// pages/async-await/p1/index.vue
+<script setup lang='ts'>
+	// composable を使うことで、ロジックが再利用可能になる const{' '}
+	{(loading, data, error, fetchSequentially)} = useSequentialData()
+</script>
+```
+
+### 3. コンポーネントの分割（再利用性・保守性向上）
+
+大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
+
+#### 3-1. components/SequentialSteps.vue の作成
+
+````vue
+<!-- components/async-await/p1/SequentialSteps.vue -->
+
+**コンポーネント分割のメリット：** - ✅ **再利用性**: 複数のページで同じ UI
+を使える - ✅ **保守性**: 変更が一箇所で済む - ✅ **可読性**:
+ファイルが小さくなり、理解しやすくなる - ✅ **テスト容易性**:
+コンポーネント単位でテストできる #### 3-2. 親コンポーネントでの使用 ```vue
+<!-- pages/async-await/p1/index.vue -->
+<template>
+	<div>
+		<SequentialSteps
+			:data="data"
+			:loading="loading"
+			:error="error"
+			@fetch="fetchSequentially"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+// composable からデータを取得
+const { loading, data, error, fetchSequentially } = useSequentialData()
+</script>
+````
+
+### 4. Template 部分の実装
+
+#### 4-1. ヘッダーと操作ボタン
+
+<template>
+	<div class="space-y-3">
+		<StepItem
+			:step="1"
+			title="投稿データ取得"
+			:data="data?.post?.title"
+		/>
+		<StepItem
+			:step="2"
+			title="ユーザーデータ取得"
+			:data="data?.user?.name"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+import type { SequentialData } from '~/types/async-await/p1/api'
+
+interface Props {
+	data: SequentialData | null
+}
+
+defineProps<Props>()
+</script>
+
+````
+
+#### 4-1. ヘッダーと操作ボタン
 
 ```vue
 <template #header>
@@ -133,7 +298,7 @@ const fetchSequentially = async () => {
 	<template v-if="!sequentialLoading">データを順次取得</template>
 	<template v-else>順次取得中...</template>
 </UButton>
-```
+````
 
 **コードの説明：**
 
@@ -141,7 +306,7 @@ const fetchSequentially = async () => {
 - ボタンは他セクションと同じローディング挙動で統一感をキープ
 - クリックのたびに `fetchSequentially` が最初から実行される
 
-#### 2-2. ローディング状態
+#### 4-2. ローディング状態
 
 ```vue
 <div v-if="sequentialLoading" class="text-center py-8 text-neutral-400">
@@ -155,7 +320,7 @@ const fetchSequentially = async () => {
 - 順次処理中のみスピナーを表示し、ステップが進行中であることを伝える
 - 文言を「順番に進めています」とすることで処理の特性を視覚化
 
-#### 2-3. エラー表示
+#### 4-3. エラー表示
 
 ```vue
 <div
@@ -173,7 +338,7 @@ const fetchSequentially = async () => {
 - 順次処理が途中で止まった場合のみ赤帯を表示
 - catch で整形したメッセージを表示し、リトライボタンで同じフローをやり直せるようにする
 
-#### 2-4. ステップフローの可視化
+#### 4-4. ステップフローの可視化
 
 ```vue
 <div v-if="sequentialData && !sequentialLoading" class="space-y-3 mt-6">
@@ -207,9 +372,74 @@ const fetchSequentially = async () => {
 - 丸いナンバーと縦ラインで「ステップ 1 → 2」の流れを表現
 - 各ボックスに取得したデータを表示し、順番に取得した成果が一目で分かる
 
+## 実装の全体像
+
+このセクションでは、実務で必須の 3 つの概念を実装しました：
+
+### 1. 型定義の明確化
+
+```typescript
+// types/async-await/p1/api.ts
+export interface SequentialData {
+	post: Post
+	user: User
+	duration: number
+}
+```
+
+**メリット：**
+
+- `any` の使用を減らし、実行時エラーを防ぐ
+- IDE の補完機能が働く
+- チーム開発でデータ構造が明確になる
+
+### 2. ロジックの分離（Composables）
+
+```typescript
+// composables/async-await/p1/useSequentialData.ts
+export const useSequentialData = () => {
+	const { loading, data, error, fetchSequentially } = ...
+	return { loading, data, error, fetchSequentially }
+}
+```
+
+**メリット：**
+
+- コードの重複を防ぐ
+- ロジックのテストが容易になる
+- 変更が一箇所で済む
+
+### 3. コンポーネントの分割
+
+```vue
+<!-- components/async-await/p1/SequentialSteps.vue -->
+<template>
+	<div class="space-y-3">
+		<!-- ステップフローの可視化 -->
+	</div>
+</template>
+```
+
+**メリット：**
+
+- ファイルが肥大化するのを防ぐ
+- 再利用性が向上する
+- 保守性が向上する
+
 ## まとめ
 
-1. **依存関係のある API では順次実行が不可欠**で、`await` を連ねるだけで実現できる
-2. **エラーが出たら即座に後続ステップを止める**ため、無駄なリクエストを防げる
-3. **並列処理との比較用に所要時間を計測**すると、ケースによって手法を選べるようになる
-4. 次章のエラーハンドリング強化（セクション 5）で、順次処理の失敗時の情報整理方法を学ぶとさらに応用範囲が広がる
+`await`を連続させることで、以下のメリットが得られます：
+
+1. **依存関係の保証**: 後続 API が前の結果に依存する場合、順序を守らないと正しく動かない
+2. **デバッグの容易さ**: どの await で止まったかが直感的に分かる
+3. **UX の向上**: UI 上で「ステップ 1 → ステップ 2」と段階を演出できる
+4. **保守性の向上**: 型定義と Composables を活用することで、依存関係のある複数 API も安全に管理できる
+
+### 実装の流れ
+
+1. **型定義を作成**: `types/async-await/p1/api.ts` で型を定義
+2. **Composable を作成**: `composables/async-await/p1/useSequentialData.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/async-await/p1/SequentialSteps.vue` で UI を分割
+4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
+
+このセクションでは、`await`を連続させた順次処理の実装方法と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。次のセクションでは、エラーハンドリングの詳細を学びます。

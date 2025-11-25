@@ -3,6 +3,42 @@
 > **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
 > JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。ユーザー情報、投稿、コメントなどのサンプルデータを提供しており、実際のバックエンドサーバーなしでフロントエンドの開発や学習が可能です。
 
+## フォルダ構成
+
+このセクションで使用するファイル構成は以下の通りです：
+
+```
+nuxtjs_practice/
+├── types/                            # 型定義ファイル（必須）
+│   └── async-await/
+│       └── p1/
+│           └── api.ts
+├── composables/                      # Composables（必須）
+│   └── async-await/
+│       └── p1/
+│           └── useUser.ts
+├── components/                        # コンポーネント（必須）
+│   └── async-await/
+│       └── p1/
+│           └── UserInfo.vue
+└── pages/
+    └── async-await/
+        ├── _docs/                    # マニュアルファイル
+        │   ├── s1_usefetch.md
+        │   ├── s2_async-try.md       # このファイル
+        │   ├── s3_promise.md
+        │   ├── s4_await.md
+        │   └── s5_error-handling.md
+        └── p1/                       # 実装例
+            └── index.vue             # メインコンポーネント
+```
+
+**実務で必須の 3 つの概念:**
+
+1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
+2. **コンポーネントの分割** - `components/async-await/p1/UserInfo.vue` で再利用性・保守性を向上
+3. **ロジックの分離** - `composables/async-await/p1/useUser.ts` で composables を活用
+
 ## 手動実装とは、なぜ必要なのか？
 
 ### 手動実装とは
@@ -74,51 +110,188 @@ const load = async () => {
 
 ## 実装手順
 
-### 1. Script 部分の実装
+実務で必須の 3 つの概念を順番に実装していきます：
+
+1. **型定義の明確化** - `any` の使用を減らす
+2. **ロジックの分離** - composables の活用
+3. **コンポーネントの分割** - 再利用性・保守性向上
+
+### 1. 型定義の作成（必須）
+
+`any` を使わずに**型定義を明確に**することが重要です。これにより、IDE の補完機能が働き、実行時エラーを防ぐことができます。
+
+#### 1-1. 型定義ファイルの作成
 
 ```typescript
-// ============================================================
-// セクション2: 手動での非同期処理（async/await + try/catch）
-// ============================================================
-const manualLoading = ref(false) // API 呼び出し中かどうか
-const manualUser = ref<any>(null) // 取得したユーザー情報を保持
-const manualError = ref<string | null>(null) // 表示用のエラーメッセージ
-
-const fetchUserManually = async () => {
-	manualUser.value = null // 以前の結果をクリア
-	manualError.value = null // 前回のエラーをクリア
-	manualLoading.value = true // ここからローディング開始
-
-	try {
-		const response = await fetch('https://jsonplaceholder.typicode.com/users/1') // API 呼び出し
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`) // ステータスが 200 系でなければ例外
-		}
-		const data = await response.json() // レスポンスボディを JSON 化
-		manualUser.value = data // 画面で使うために格納
-	} catch (error) {
-		manualError.value = error instanceof Error ? error.message : '不明なエラー' // 表示用に文字列化
-		console.error('エラー:', error) // デバッグログ
-	} finally {
-		manualLoading.value = false // 成功・失敗どちらでもローディング終了
+// types/async-await/p1/api.ts
+export interface User {
+	id: number
+	name: string
+	username: string
+	email: string
+	phone?: string
+	website?: string
+	address?: {
+		street: string
+		city: string
+		zipcode: string
+	}
+	company?: {
+		name: string
+		catchPhrase?: string
 	}
 }
 ```
 
-**コードの説明：**
+#### 1-2. 型定義の使用
 
-- `manualLoading / manualUser / manualError`: 3 つの `ref` で UI 表示に必要な状態を切り分け
-- `manualUser.value = null`: 新しい取得を始める前に前回結果を必ずリセット
-- `manualLoading.value = true`: API 呼び出しが始まったタイミングでローディングをオン
-- `await fetch('https://jsonplaceholder.typicode.com/users/1')`: JSONPlaceholder のユーザー API を呼び出し。ID 1 のユーザー情報を取得します
-- `if (!response.ok) { throw ... }`: HTTP 400/500 系を手動で検出し、catch に処理を委ねる
-- `await response.json()`: ボディを JSON へパース。await しないと Promise が残ってしまう
-- `catch (error) { ... }`: エラーの型をチェックしつつユーザー表示用の文字列をセット
-- `finally { manualLoading.value = false }`: どんな結果でも UI を通常状態へ戻す安全弁
+```typescript
+import type { User } from '~/types/async-await/p1/api'
 
-### 2. Template 部分の実装
+// ❌ 悪い例：any を使う
+const manualUser = ref<any>(null)
 
-#### 2-1. ヘッダーと操作ボタン
+// ✅ 良い例：型を定義する
+const manualUser = ref<User | null>(null)
+```
+
+**型定義のメリット：**
+
+- IDE が自動補完してくれる（`user.value.name` など）
+- タイポをコンパイル時に検出できる
+- チーム開発でデータ構造が明確になる
+- リファクタリングが安全にできる
+
+### 2. ロジックの分離（Composables の活用）
+
+ロジックを**composables**に分離することで、再利用性と保守性が向上します。
+
+#### 2-1. composables/useUser.ts の作成
+
+```typescript
+// composables/async-await/p1/useUser.ts
+import type { User } from '~/types/async-await/p1/api'
+
+export const useUser = (userId: number = 1) => {
+	const loading = ref(false)
+	const user = ref<User | null>(null)
+	const error = ref<string | null>(null)
+
+	const fetchUser = async () => {
+		user.value = null
+		error.value = null
+		loading.value = true
+
+		try {
+			const response = await fetch(
+				`https://jsonplaceholder.typicode.com/users/${userId}`
+			)
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`)
+			}
+			const data = (await response.json()) as User
+			user.value = data
+		} catch (err) {
+			error.value = err instanceof Error ? err.message : '不明なエラー'
+			console.error('エラー:', err)
+		} finally {
+			loading.value = false
+		}
+	}
+
+	return {
+		loading,
+		user,
+		error,
+		fetchUser,
+	}
+}
+```
+
+**Composables のメリット：**
+
+- ✅ **再利用性**: 複数のページで同じロジックを使える
+- ✅ **テスト容易性**: ロジックだけをテストできる
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: コンポーネントがシンプルになる
+
+#### 2-2. コンポーネントでの使用
+
+```typescript
+// pages/async-await/p1/index.vue
+<script setup lang="ts">
+	// composable を使うことで、ロジックが再利用可能になる
+	const { loading, user, error, fetchUser } = useUser(1)
+</script>
+```
+
+### 3. コンポーネントの分割（再利用性・保守性向上）
+
+大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
+
+#### 3-1. components/UserInfo.vue の作成
+
+```vue
+<!-- components/async-await/p1/UserInfo.vue -->
+
+**コンポーネント分割のメリット：**
+
+- ✅ **再利用性**: 複数のページで同じ UI を使える
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: ファイルが小さくなり、理解しやすくなる
+- ✅ **テスト容易性**: コンポーネント単位でテストできる
+
+#### 3-2. 親コンポーネントでの使用
+
+```vue
+<!-- pages/async-await/p1/index.vue -->
+<template>
+	<div>
+		<UserInfo
+			:user="user"
+			:loading="loading"
+			:error="error"
+			@fetch="fetchUser"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+	// composable からデータを取得
+	const { loading, user, error, fetchUser } = useUser(1)
+</script>
+```
+
+### 4. Template 部分の実装
+
+#### 4-1. ヘッダーと操作ボタン
+<template>
+	<UCard>
+		<template #header>
+			<h2>ユーザー情報</h2>
+		</template>
+		<div v-if="user && !loading">
+			<table class="w-full">
+				<!-- ユーザー情報テーブル -->
+			</table>
+		</div>
+	</UCard>
+</template>
+
+<script setup lang="ts">
+import type { User } from '~/types/async-await/p1/api'
+
+interface Props {
+	user: User | null
+	loading: boolean
+	error: string | null
+}
+
+defineProps<Props>()
+</script>
+```
+
+#### 4-1. ヘッダーと操作ボタン
 
 ```vue
 <template #header>
@@ -144,7 +317,7 @@ const fetchUserManually = async () => {
 - `:loading="manualLoading"` で API 実行中は自動でスピナー表示に切り替え
 - `v-if / v-else` でボタンテキストも「取得」「取得中…」へ同期
 
-#### 2-2. ローディング状態の表示
+#### 4-2. ローディング状態の表示
 
 ```vue
 <div v-if="manualLoading" class="text-center py-8 text-neutral-400">
@@ -159,7 +332,7 @@ const fetchUserManually = async () => {
 - `animate-spin` を持つ円を描画し、視覚的に処理中であることを伝える
 - テキストも「読み込み中」と明示してユーザーに待機を促す
 
-#### 2-3. エラー状態の表示
+#### 4-3. エラー状態の表示
 
 ```vue
 <div
@@ -178,7 +351,7 @@ const fetchUserManually = async () => {
 - `{{ manualError }}` で catch 内で整形した詳細メッセージをそのまま提示
 - リトライボタンから同じ `fetchUserManually` を呼び、ユーザー自身が再実行できる
 
-#### 2-4. 結果テーブルの表示
+#### 4-4. 結果テーブルの表示
 
 ```vue
 <div v-if="manualUser && !manualLoading" class="overflow-x-auto">
@@ -223,9 +396,75 @@ const fetchUserManually = async () => {
 - `manualUser.address?.city` のようにオプショナルチェーンでネストした値を安全に参照
 - 末尾の `<p>` で ID など補足情報も表示し、取得結果をフル活用
 
+## 実装の全体像
+
+このセクションでは、実務で必須の 3 つの概念を実装しました：
+
+### 1. 型定義の明確化
+
+```typescript
+// types/async-await/p1/api.ts
+export interface User {
+	id: number
+	name: string
+	username: string
+	email: string
+}
+```
+
+**メリット：**
+
+- `any` の使用を減らし、実行時エラーを防ぐ
+- IDE の補完機能が働く
+- チーム開発でデータ構造が明確になる
+
+### 2. ロジックの分離（Composables）
+
+```typescript
+// composables/async-await/p1/useUser.ts
+export const useUser = () => {
+	const { loading, user, error, fetchUser } = ...
+	return { loading, user, error, fetchUser }
+}
+```
+
+**メリット：**
+
+- コードの重複を防ぐ
+- ロジックのテストが容易になる
+- 変更が一箇所で済む
+
+### 3. コンポーネントの分割
+
+```vue
+<!-- components/async-await/p1/UserInfo.vue -->
+<template>
+	<UCard>
+		<!-- ユーザー情報のUI -->
+	</UCard>
+</template>
+```
+
+**メリット：**
+
+- ファイルが肥大化するのを防ぐ
+- 再利用性が向上する
+- 保守性が向上する
+
 ## まとめ
 
-1. **状態リセット → API 実行 → 例外処理 → 後片付け** を 1 つの関数に集約することで見通しが良くなる
-2. `ref` で分けたローディング／データ／エラーをテンプレートで素直に参照し UI を切り替える
-3. エラーメッセージの整形やリトライ導線など、ヘルパーでは隠蔽される細部まで自作できる
-4. この手動フローを理解すると、次の Promise 並列・直列処理（セクション 3 / 4）もスムーズに応用できる
+`async/await`と`try/catch`を使うことで、以下のメリットが得られます：
+
+1. **コードがシンプル**: 状態リセット → API 実行 → 例外処理 → 後片付けを 1 つの関数に集約
+2. **制御が細かい**: エラーメッセージの整形やリトライ導線など、細部まで自作できる
+3. **保守性の向上**: 型定義と Composables を活用することで、実務レベルのコード品質を実現
+4. **理解が深まる**: この手動フローを理解すると、次の Promise 並列・直列処理（セクション 3 / 4）もスムーズに応用できる
+
+### 実装の流れ
+
+1. **型定義を作成**: `types/async-await/p1/api.ts` で型を定義
+2. **Composable を作成**: `composables/async-await/p1/useUser.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/async-await/p1/UserInfo.vue` で UI を分割
+4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
+
+このセクションでは、手動での非同期処理の実装方法と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。次のセクションでは、複数の API を並列で取得する方法を学びます。

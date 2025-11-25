@@ -3,6 +3,42 @@
 > **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
 > JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。存在しない ID（例: /posts/99999）を指定することで 404 エラーを意図的に発生させ、エラーハンドリングの学習に最適です。
 
+## フォルダ構成
+
+このセクションで使用するファイル構成は以下の通りです：
+
+```
+nuxtjs_practice/
+├── types/                            # 型定義ファイル（必須）
+│   └── async-await/
+│       └── p1/
+│           └── api.ts
+├── composables/                      # Composables（必須）
+│   └── async-await/
+│       └── p1/
+│           └── useErrorHandling.ts
+├── components/                        # コンポーネント（必須）
+│   └── async-await/
+│       └── p1/
+│           └── ErrorResultDisplay.vue
+└── pages/
+    └── async-await/
+        ├── _docs/                    # マニュアルファイル
+        │   ├── s1_usefetch.md
+        │   ├── s2_async-try.md
+        │   ├── s3_promise.md
+        │   ├── s4_await.md
+        │   └── s5_error-handling.md # このファイル
+        └── p1/                       # 実装例
+            └── index.vue             # メインコンポーネント
+```
+
+**実務で必須の 3 つの概念:**
+
+1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
+2. **コンポーネントの分割** - `components/async-await/p1/ErrorResultDisplay.vue` で再利用性・保守性を向上
+3. **ロジックの分離** - `composables/async-await/p1/useErrorHandling.ts` で composables を活用
+
 ## エラーハンドリングとは、なぜ必要なのか？
 
 ### エラーハンドリングとは
@@ -56,91 +92,204 @@ try {
 
 ## 実装手順
 
-### 1. Script 部分の実装
+実務で必須の 3 つの概念を順番に実装していきます：
+
+1. **型定義の明確化** - `any` の使用を減らす
+2. **ロジックの分離** - composables の活用
+3. **コンポーネントの分割** - 再利用性・保守性向上
+
+### 1. 型定義の作成（必須）
+
+`any` を使わずに**型定義を明確に**することが重要です。これにより、IDE の補完機能が働き、実行時エラーを防ぐことができます。
+
+#### 1-1. 型定義ファイルの作成
 
 ```typescript
-// ============================================================
-// セクション5: エラーハンドリングを徹底解説
-// ============================================================
-const errorHandlingLoading = ref(false) // テスト実行中かどうか
-const errorHandlingResult = ref<any>(null) // 成功/失敗と詳細をまとめたオブジェクト
+// types/async-await/p1/api.ts
+export interface Post {
+	id: number
+	title: string
+	body: string
+}
 
-const fetchWithDetailedErrorHandling = async () => {
-	errorHandlingResult.value = null // 前回結果をクリア
-	errorHandlingLoading.value = true // ボタンのローディングを開始
+export type ErrorStatus = number | 'NETWORK_ERROR' | 'UNKNOWN_ERROR'
 
-	try {
-		const response = await fetch(
-			'https://jsonplaceholder.typicode.com/posts/99999'
-		) // 404 を返すテスト API
+export interface ErrorHandlingResult {
+	success: boolean
+	message: string
+	status: ErrorStatus
+	data?: Post
+}
+```
 
-		if (response.status === 404) {
-			errorHandlingResult.value = {
-				success: false,
-				message: 'リソースが見つかりませんでした（404）',
-				status: 404,
+#### 1-2. 型定義の使用
+
+```typescript
+import type { Post, ErrorHandlingResult } from '~/types/async-await/p1/api'
+```
+
+**型定義のメリット：**
+
+- IDE が自動補完してくれる（`result.value.status` など）
+- タイポをコンパイル時に検出できる
+- チーム開発でデータ構造が明確になる
+- リファクタリングが安全にできる
+
+### 2. ロジックの分離（Composables の活用）
+
+ロジックを**composables**に分離することで、再利用性と保守性が向上します。
+
+#### 2-1. composables/useErrorHandling.ts の作成
+
+```typescript
+// composables/async-await/p1/useErrorHandling.ts
+import type { Post, ErrorHandlingResult } from '~/types/async-await/p1/api'
+
+export const useErrorHandling = () => {
+	const loading = ref(false)
+	const result = ref<ErrorHandlingResult | null>(null)
+
+	const fetchWithDetailedErrorHandling = async (postId: number = 99999) => {
+		result.value = null
+		loading.value = true
+
+		try {
+			const response = await fetch(
+				`https://jsonplaceholder.typicode.com/posts/${postId}`
+			)
+
+			if (response.status === 404) {
+				result.value = {
+					success: false,
+					message: 'リソースが見つかりませんでした（404）',
+					status: 404,
+				}
+				return
 			}
-			return // ここで終了し、テンプレートへ結果を渡す
-		}
 
-		if (response.status >= 500) {
-			errorHandlingResult.value = {
-				success: false,
-				message: 'サーバーエラーが発生しました（500番台）',
-				status: response.status,
+			if (response.status >= 500) {
+				result.value = {
+					success: false,
+					message: 'サーバーエラーが発生しました（500番台）',
+					status: response.status,
+				}
+				return
 			}
-			return
-		}
 
-		if (!response.ok) {
-			errorHandlingResult.value = {
-				success: false,
-				message: `HTTP エラー: ${response.status}`,
-				status: response.status,
+			if (!response.ok) {
+				result.value = {
+					success: false,
+					message: `HTTP エラー: ${response.status}`,
+					status: response.status,
+				}
+				return
 			}
-			return
-		}
 
-		const data = await response.json() // 成功時のみ JSON を読み込む
-		errorHandlingResult.value = {
-			success: true,
-			message: 'データの取得に成功しました',
-			data,
-		}
-	} catch (error) {
-		if (error instanceof TypeError && error.message.includes('fetch')) {
-			errorHandlingResult.value = {
-				success: false,
-				message: 'ネットワークエラー: インターネット接続を確認してください',
-				status: 'NETWORK_ERROR',
+			const data = (await response.json()) as Post
+			result.value = {
+				success: true,
+				message: 'データの取得に成功しました',
+				data,
 			}
-		} else {
-			errorHandlingResult.value = {
-				success: false,
-				message: error instanceof Error ? error.message : '不明なエラー',
-				status: 'UNKNOWN_ERROR',
+		} catch (error) {
+			if (error instanceof TypeError && error.message.includes('fetch')) {
+				result.value = {
+					success: false,
+					message: 'ネットワークエラー: インターネット接続を確認してください',
+					status: 'NETWORK_ERROR',
+				}
+			} else {
+				result.value = {
+					success: false,
+					message: error instanceof Error ? error.message : '不明なエラー',
+					status: 'UNKNOWN_ERROR',
+				}
 			}
+			console.error('詳細エラー情報:', error)
+		} finally {
+			loading.value = false
 		}
-		console.error('詳細エラー情報:', error) // デバッグ用ログ
-	} finally {
-		errorHandlingLoading.value = false // UI を通常状態へ戻す
+	}
+
+	return {
+		loading,
+		result,
+		fetchWithDetailedErrorHandling,
 	}
 }
 ```
 
-**コードの説明：**
+**Composables のメリット：**
 
-- `errorHandlingResult`: `success`/`message`/`status` を 1 つのオブジェクトにまとめ、テンプレート側の分岐を単純化
-- `fetch('https://jsonplaceholder.typicode.com/posts/99999')`: JSONPlaceholder の存在しない ID（99999）を指定し、意図的に 404 エラーを発生させてエラーハンドリングのパターンを検証
-- `status === 404`, `status >= 500`, `!ok`: 頻出ケースを段階的にチェックし、メッセージを出し分け
-- `return` を挟んで早期リターンし、成功時の JSON 解析までたどり着かないようにする
-- `TypeError` 判定でネットワークエラー特有のメッセージを表示（オフライン時など）
-- `console.error` で詳細を残し、ユーザー表示とは別に開発者が調査しやすいようにする
-- `finally` でローディングを必ず解除し、ボタンを再び押せるようにする
+- ✅ **再利用性**: 複数のページで同じロジックを使える
+- ✅ **テスト容易性**: ロジックだけをテストできる
+- ✅ **保守性**: 変更が一箇所で済む
+- ✅ **可読性**: コンポーネントがシンプルになる
 
-### 2. Template 部分の実装
+#### 2-2. コンポーネントでの使用
 
-#### 2-1. ヘッダーと操作ボタン
+```typescript
+// pages/async-await/p1/index.vue
+<script setup lang='ts'>
+	// composable を使うことで、ロジックが再利用可能になる const{' '}
+	{(loading, result, fetchWithDetailedErrorHandling)} = useErrorHandling()
+</script>
+```
+
+### 3. コンポーネントの分割（再利用性・保守性向上）
+
+大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
+
+#### 3-1. components/ErrorResultDisplay.vue の作成
+
+````vue
+<!-- components/async-await/p1/ErrorResultDisplay.vue -->
+
+**コンポーネント分割のメリット：** - ✅ **再利用性**: 複数のページで同じ UI
+を使える - ✅ **保守性**: 変更が一箇所で済む - ✅ **可読性**:
+ファイルが小さくなり、理解しやすくなる - ✅ **テスト容易性**:
+コンポーネント単位でテストできる #### 3-2. 親コンポーネントでの使用 ```vue
+<!-- pages/async-await/p1/index.vue -->
+<template>
+	<div>
+		<ErrorResultDisplay
+			:result="result"
+			:loading="loading"
+			@fetch="fetchWithDetailedErrorHandling"
+		/>
+	</div>
+</template>
+
+<script setup lang="ts">
+// composable からデータを取得
+const { loading, result, fetchWithDetailedErrorHandling } = useErrorHandling()
+</script>
+````
+
+### 4. Template 部分の実装
+
+#### 4-1. ヘッダーと操作ボタン
+
+<template>
+	<div v-if="result" class="space-y-2">
+		<SuccessCard v-if="result.success" :message="result.message" />
+		<ErrorCard v-else :result="result" />
+	</div>
+</template>
+
+<script setup lang="ts">
+import type { ErrorHandlingResult } from '~/types/async-await/p1/api'
+
+interface Props {
+	result: ErrorHandlingResult | null
+}
+
+defineProps<Props>()
+</script>
+
+````
+
+#### 4-1. ヘッダーと操作ボタン
 
 ```vue
 <template #header>
@@ -163,14 +312,14 @@ const fetchWithDetailedErrorHandling = async () => {
 	<template v-if="!errorHandlingLoading">エラーハンドリングをテスト</template>
 	<template v-else>テスト実行中...</template>
 </UButton>
-```
+````
 
 **コードの説明：**
 
 - ヘッダーで最新のステータスコード／エラータイプを確認できるようにし、何度もテストする際のメモになる
 - ボタンのローディング表示は他セクションと統一し、操作感を揃える
 
-#### 2-2. 成功／失敗の結果表示
+#### 4-2. 成功／失敗の結果表示
 
 ```vue
 <div v-if="errorHandlingResult" class="space-y-2 mt-4">
@@ -229,9 +378,84 @@ const fetchWithDetailedErrorHandling = async () => {
 - 失敗時はステータスを表形式で表示し、404/NETWORK_ERROR などをひと目で判別
 - 追加の行を `v-else-if` で用意し、今後ステータスが増えても簡単に拡張可能
 
+## 実装の全体像
+
+このセクションでは、実務で必須の 3 つの概念を実装しました：
+
+### 1. 型定義の明確化
+
+```typescript
+// types/async-await/p1/api.ts
+export interface ErrorHandlingResult {
+	success: boolean
+	message: string
+	status: ErrorStatus
+	data?: Post
+}
+```
+
+**メリット：**
+
+- `any` の使用を減らし、実行時エラーを防ぐ
+- IDE の補完機能が働く
+- チーム開発でデータ構造が明確になる
+
+### 2. ロジックの分離（Composables）
+
+```typescript
+// composables/async-await/p1/useErrorHandling.ts
+export const useErrorHandling = () => {
+	const { loading, result, fetchWithDetailedErrorHandling } = ...
+	return { loading, result, fetchWithDetailedErrorHandling }
+}
+```
+
+**メリット：**
+
+- コードの重複を防ぐ
+- ロジックのテストが容易になる
+- 変更が一箇所で済む
+
+### 3. コンポーネントの分割
+
+```vue
+<!-- components/async-await/p1/ErrorResultDisplay.vue -->
+<template>
+	<div v-if="result" class="space-y-2">
+		<!-- 成功／失敗の結果表示 -->
+	</div>
+</template>
+```
+
+**メリット：**
+
+- ファイルが肥大化するのを防ぐ
+- 再利用性が向上する
+- 保守性が向上する
+
+### 実務でのエラーハンドリングの重要性
+
+エラーハンドリングは実務で**最も重要な要素の一つ**です：
+
+- **ユーザー体験**: 適切なエラーメッセージでユーザーの混乱を防ぐ
+- **デバッグ効率**: 詳細なログで問題の特定が容易になる
+- **監視・アラート**: エラータイプに応じた適切な対応が可能
+- **保守性**: 統一されたエラー処理でコードの見通しが良くなる
+
 ## まとめ
 
-1. **エラーハンドリングはメッセージ設計と UI 表現をセットで考える**
-2. **ステータスごとの早期リターンと catch フォールバック**でコードの見通しを良くできる
-3. **結果オブジェクトを 1 箇所にまとめるとテンプレートがシンプル**になり、再利用もしやすい
-4. ここまでで useFetch → 手動 async → Promise.all → 連続 await → 詳細エラー管理という非同期処理の主要パターンを網羅できたので、必要に応じてリトライやログ送信などの発展パターンにも挑戦してみよう
+エラーハンドリングを徹底することで、以下のメリットが得られます：
+
+1. **UX の向上**: 適切なエラーメッセージでユーザーの混乱を防ぐ
+2. **デバッグ効率**: ステータスごとの早期リターンと catch フォールバックでコードの見通しを良くできる
+3. **保守性の向上**: 結果オブジェクトを 1 箇所にまとめるとテンプレートがシンプルになり、再利用もしやすい
+4. **安全性の向上**: 型定義と Composables を活用することで、エラーハンドリングも安全に管理できる
+
+### 実装の流れ
+
+1. **型定義を作成**: `types/async-await/p1/api.ts` で型を定義
+2. **Composable を作成**: `composables/async-await/p1/useErrorHandling.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/async-await/p1/ErrorResultDisplay.vue` で UI を分割
+4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
+
+このセクションでは、エラーハンドリングの詳細な実装方法と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。ここまでで useFetch → 手動 async → Promise.all → 連続 await → 詳細エラー管理という非同期処理の主要パターンを網羅できたので、必要に応じてリトライやログ送信などの発展パターンにも挑戦してみましょう。
