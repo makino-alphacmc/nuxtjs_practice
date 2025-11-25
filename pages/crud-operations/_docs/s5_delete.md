@@ -10,7 +10,7 @@
 ```
 nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
-│   └── http-signal/
+│   └── crud-operations/
 │       └── p1/
 │           └── api.ts                # Post 型定義
 ├── composables/                      # Composables（必須）
@@ -36,7 +36,7 @@ nuxtjs_practice/
 
 **実務で必須の 4 つの概念:**
 
-1. **型定義の明確化** - `types/http-signal/p1/api.ts` で `any` の使用を減らす
+1. **型定義の明確化** - `types/crud-operations/p1/api.ts` で `any` の使用を減らす
 2. **コンポーネントの分割** - `components/crud-operations/p1/PostListWithOperations.vue` で再利用性・保守性を向上
 3. **ロジックの分離** - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
@@ -124,7 +124,7 @@ await $fetch(`https://jsonplaceholder.typicode.com/posts/${id}`, {
 #### 1-1. 型定義ファイルの作成
 
 ```typescript
-// types/http-signal/p1/api.ts
+// types/crud-operations/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -138,7 +138,7 @@ DELETE リクエストでは、通常 ID のみが必要なため、特別な型
 #### 1-2. 型定義の使用
 
 ```typescript
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 
 // 型を指定して DELETE リクエストを送信
 const deletePost = async (id: number): Promise<void> => {
@@ -162,7 +162,7 @@ const deletePost = async (id: number): Promise<void> => {
 
 ```typescript
 // composables/crud-operations/p1/useCrudWithArrayOperations.ts
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com/posts'
 
@@ -278,7 +278,7 @@ const handleDeletePost = async (id: number) => {
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 
 export default defineComponent({
 	name: 'PostListWithOperations',
@@ -337,7 +337,7 @@ import { useCrudWithArrayOperations } from '~/composables/crud-operations/p1/use
 import PostListWithOperations from '~/components/crud-operations/p1/PostListWithOperations.vue'
 
 // 型定義を明示的にインポート
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 ```
 
 **明示的なインポートのメリット：**
@@ -393,7 +393,7 @@ const handleDeletePost = async (id: number) => {
 ### 1. 型定義の明確化
 
 ```typescript
-// types/http-signal/p1/api.ts
+// types/crud-operations/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -487,7 +487,7 @@ DELETE リクエストを使うことで、以下のメリットが得られま�
 
 ### 実装の流れ
 
-1. **型定義を作成**: `types/http-signal/p1/api.ts` で型を定義
+1. **型定義を作成**: `types/crud-operations/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/crud-operations/p1/useCrudWithArrayOperations.ts` でロジックを分離
 3. **コンポーネントを作成**: `components/crud-operations/p1/PostListWithOperations.vue` で UI を分割
 4. **メインコンポーネントで統合**: `pages/crud-operations/p1/index.vue` で全てを組み合わせる

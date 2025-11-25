@@ -17,7 +17,7 @@
 ```
 nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
-│   └── http-signal/
+│   └── crud-operations/
 │       └── p1/
 │           └── api.ts                # Post, CreatePostRequest, UpdatePostRequest の型定義
 ├── composables/                      # Composables（必須）
@@ -53,7 +53,7 @@ nuxtjs_practice/
 
 **使用ファイル:**
 - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` - `fetchPosts()` メソッド
-- `types/http-signal/p1/api.ts` - Post 型定義
+- `types/crud-operations/p1/api.ts` - Post 型定義
 
 **特徴:**
 - `$fetch` を使った手動での HTTP リクエスト
@@ -85,7 +85,7 @@ nuxtjs_practice/
 **使用ファイル:**
 - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` - `createPost()` メソッド
 - `components/http-signal/p1/PostCreateForm.vue` - 新規投稿作成フォーム
-- `types/http-signal/p1/api.ts` - CreatePostRequest 型定義
+- `types/crud-operations/p1/api.ts` - CreatePostRequest 型定義
 
 **特徴:**
 - フォーム入力からデータを作成
@@ -101,7 +101,7 @@ nuxtjs_practice/
 **使用ファイル:**
 - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` - `updatePost()` メソッド
 - `components/http-signal/p1/PostEditForm.vue` - 投稿更新フォーム
-- `types/http-signal/p1/api.ts` - UpdatePostRequest 型定義
+- `types/crud-operations/p1/api.ts` - UpdatePostRequest 型定義
 
 **特徴:**
 - 既存データを選択して編集
@@ -133,7 +133,7 @@ nuxtjs_practice/
 `any` を使わずに**型定義を明確に**することで、IDE の補完機能が働き、実行時エラーを防ぐことができます。
 
 ```typescript
-// types/http-signal/p1/api.ts
+// types/crud-operations/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -215,7 +215,7 @@ import PostListWithOperations from '~/components/crud-operations/p1/PostListWith
 
 ## 実装の流れ
 
-1. **型定義を作成** - `types/http-signal/p1/api.ts` で型を定義
+1. **型定義を作成** - `types/crud-operations/p1/api.ts` で型を定義
 2. **Composable を作成** - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` でロジックを分離
 3. **コンポーネントを作成** - `components/crud-operations/p1/PostListWithOperations.vue` で UI を分割
 4. **メインコンポーネントで統合** - `pages/crud-operations/p1/index.vue` で全てを組み合わせる

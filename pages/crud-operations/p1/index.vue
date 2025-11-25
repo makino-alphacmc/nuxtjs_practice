@@ -96,7 +96,7 @@ import type {
 	Post,
 	CreatePostRequest,
 	UpdatePostRequest,
-} from '~/types/http-signal/p1/api'
+} from '~/types/crud-operations/p1/api'
 
 // API通信 + 配列操作のcomposableを使用
 const {

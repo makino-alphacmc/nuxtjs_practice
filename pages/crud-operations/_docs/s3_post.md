@@ -10,7 +10,7 @@
 ```
 nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
-│   └── http-signal/
+│   └── crud-operations/
 │       └── p1/
 │           └── api.ts                # CreatePostRequest 型定義
 ├── composables/                      # Composables（必須）
@@ -36,7 +36,7 @@ nuxtjs_practice/
 
 **実務で必須の 4 つの概念:**
 
-1. **型定義の明確化** - `types/http-signal/p1/api.ts` で `any` の使用を減らす
+1. **型定義の明確化** - `types/crud-operations/p1/api.ts` で `any` の使用を減らす
 2. **コンポーネントの分割** - `components/http-signal/p1/PostCreateForm.vue` で再利用性・保守性を向上
 3. **ロジックの分離** - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
@@ -116,7 +116,7 @@ const newPost = await $fetch<Post>('https://jsonplaceholder.typicode.com/posts',
 #### 1-1. 型定義ファイルの作成
 
 ```typescript
-// types/http-signal/p1/api.ts
+// types/crud-operations/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -134,7 +134,7 @@ export interface CreatePostRequest {
 #### 1-2. 型定義の使用
 
 ```typescript
-import type { CreatePostRequest, Post } from '~/types/http-signal/p1/api'
+import type { CreatePostRequest, Post } from '~/types/crud-operations/p1/api'
 
 // 型を指定して POST リクエストを送信
 const createPost = async (postData: CreatePostRequest): Promise<Post> => {
@@ -277,7 +277,7 @@ const handleCreatePost = async (postData: CreatePostRequest) => {
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import type { CreatePostRequest } from '~/types/http-signal/p1/api'
+import type { CreatePostRequest } from '~/types/crud-operations/p1/api'
 
 export default defineComponent({
 	name: 'PostCreateForm',
@@ -344,7 +344,7 @@ import { useCrudWithArrayOperations } from '~/composables/crud-operations/p1/use
 import PostCreateForm from '~/components/http-signal/p1/PostCreateForm.vue'
 
 // 型定義を明示的にインポート
-import type { CreatePostRequest } from '~/types/http-signal/p1/api'
+import type { CreatePostRequest } from '~/types/crud-operations/p1/api'
 </script>
 ```
 
@@ -364,7 +364,7 @@ import { useCrudWithArrayOperations } from '~/composables/crud-operations/p1/use
 import PostCreateForm from '~/components/http-signal/p1/PostCreateForm.vue'
 
 // 型定義を明示的にインポート
-import type { CreatePostRequest } from '~/types/http-signal/p1/api'
+import type { CreatePostRequest } from '~/types/crud-operations/p1/api'
 ```
 
 **明示的なインポートのメリット：**
@@ -428,7 +428,7 @@ import type { CreatePostRequest } from '~/types/http-signal/p1/api'
 ### 1. 型定義の明確化
 
 ```typescript
-// types/http-signal/p1/api.ts
+// types/crud-operations/p1/api.ts
 export interface CreatePostRequest {
 	title: string
 	body: string
@@ -514,7 +514,7 @@ POST リクエストを使うことで、以下のメリットが得られます
 
 ### 実装の流れ
 
-1. **型定義を作成**: `types/http-signal/p1/api.ts` で型を定義
+1. **型定義を作成**: `types/crud-operations/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/crud-operations/p1/useCrudWithArrayOperations.ts` でロジックを分離
 3. **コンポーネントを作成**: `components/http-signal/p1/PostCreateForm.vue` で UI を分割
 4. **メインコンポーネントで統合**: `pages/crud-operations/p1/index.vue` で全てを組み合わせる

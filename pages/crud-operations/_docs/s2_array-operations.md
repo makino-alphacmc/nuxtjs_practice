@@ -10,7 +10,7 @@
 ```
 nuxtjs_practice/
 ├── types/                            # 型定義ファイル（必須）
-│   └── http-signal/
+│   └── crud-operations/
 │       └── p1/
 │           └── api.ts                # Post 型定義
 ├── composables/                      # Composables（必須）
@@ -36,7 +36,7 @@ nuxtjs_practice/
 
 **実務で必須の 4 つの概念:**
 
-1. **型定義の明確化** - `types/http-signal/p1/api.ts` で `any` の使用を減らす
+1. **型定義の明確化** - `types/crud-operations/p1/api.ts` で `any` の使用を減らす
 2. **コンポーネントの分割** - `components/crud-operations/p1/PostListWithOperations.vue` で再利用性・保守性を向上
 3. **ロジックの分離** - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
@@ -154,7 +154,7 @@ const paginatedPosts = computed(() => {
 #### 1-1. 型定義ファイルの作成
 
 ```typescript
-// types/http-signal/p1/api.ts
+// types/crud-operations/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -166,7 +166,7 @@ export interface Post {
 #### 1-2. 型定義の使用
 
 ```typescript
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 
 // 配列操作の戻り値も Post[] 型になる
 const filtered: Post[] = posts.filter((post: Post) => post.userId === 1)
@@ -186,7 +186,7 @@ const filtered: Post[] = posts.filter((post: Post) => post.userId === 1)
 
 ```typescript
 // composables/crud-operations/p1/useCrudWithArrayOperations.ts
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 
 export const useCrudWithArrayOperations = () => {
 	const posts = useState<Post[]>('crud-operations-p1-posts', () => [])
@@ -435,7 +435,7 @@ import { useCrudWithArrayOperations } from '~/composables/crud-operations/p1/use
 import PostListWithOperations from '~/components/crud-operations/p1/PostListWithOperations.vue'
 
 // 型定義を明示的にインポート
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 ```
 
 **明示的なインポートのメリット：**
@@ -451,7 +451,7 @@ import type { Post } from '~/types/http-signal/p1/api'
 ### 1. 型定義の明確化
 
 ```typescript
-// types/http-signal/p1/api.ts
+// types/crud-operations/p1/api.ts
 export interface Post {
 	id: number
 	title: string
@@ -525,7 +525,7 @@ import PostListWithOperations from '~/components/crud-operations/p1/PostListWith
 
 ### 実装の流れ
 
-1. **型定義を作成**: `types/http-signal/p1/api.ts` で型を定義
+1. **型定義を作成**: `types/crud-operations/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/crud-operations/p1/useCrudWithArrayOperations.ts` でロジックを分離
 3. **コンポーネントを作成**: `components/crud-operations/p1/PostListWithOperations.vue` で UI を分割
 4. **メインコンポーネントで統合**: `pages/crud-operations/p1/index.vue` で全てを組み合わせる

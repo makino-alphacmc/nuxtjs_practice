@@ -1,7 +1,7 @@
 // composables/crud-operations/p1/useCrudWithArrayOperations.ts
 import { ref, computed, watch, readonly } from 'vue'
 import { useState } from '#app'
-import type { Post, CreatePostRequest, UpdatePostRequest } from '~/types/http-signal/p1/api'
+import type { Post, CreatePostRequest, UpdatePostRequest } from '~/types/crud-operations/p1/api'
 
 const BASE_URL = 'https://jsonplaceholder.typicode.com/posts'
 

@@ -209,7 +209,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import type { Post } from '~/types/http-signal/p1/api'
+import type { Post } from '~/types/crud-operations/p1/api'
 
 export default defineComponent({
 	name: 'PostListWithOperations',
