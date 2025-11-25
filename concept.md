@@ -31,7 +31,7 @@
 - Nuxt UI（Card / Button / Input / Textarea）
 
 ============================================================
-🏗️ 実務で必須の 3 つの概念
+🏗️ 実務で必須の 4 つの概念
 ============================================================
 
 ## 1. 型定義の明確化（`any` の使用を減らす）
@@ -99,6 +99,50 @@
 - ✅ ロジックだけをテストできる
 - ✅ 変更が一箇所で済む
 - ✅ コンポーネントがシンプルになる
+
+---
+
+## 4. 明示的なインポート（トラブル回避）
+
+**目的:**
+
+- 自動インポートの不具合を避ける
+- 依存関係を明確にする
+- コードの可読性・保守性を向上させる
+
+**実装内容:**
+
+- Composables は深い階層（`composables/async-await/p1/`）では自動インポートが機能しないため、明示的にインポート
+- Components も同様に、深い階層では明示的にインポート
+- 型定義は常に明示的にインポート
+
+**実装例:**
+
+```typescript
+// Composables を明示的にインポート
+import { usePosts } from '~/composables/async-await/p1/usePosts'
+import { useUser } from '~/composables/async-await/p1/useUser'
+
+// Components を明示的にインポート
+import PostList from '~/components/async-await/p1/PostList.vue'
+import UserInfo from '~/components/async-await/p1/UserInfo.vue'
+
+// 型定義を明示的にインポート
+import type { Post, User } from '~/types/async-await/p1/api'
+```
+
+**メリット:**
+
+- ✅ 自動インポートが機能しない場合でも確実に動作する
+- ✅ どこから来ているかが明確で、コードレビューがしやすい
+- ✅ 依存関係が明確で、リファクタリングが安全
+- ✅ チーム開発で混乱を避けられる
+
+**注意事項:**
+
+- Nuxt 3 の組み込み関数（`useFetch`, `useRoute`, `useRouter`など）は自動インポートで問題なし
+- `components/`の直下のコンポーネントは自動インポートが機能するが、深い階層では機能しないことがある
+- `composables/`の直下の composables は自動インポートが機能するが、深い階層では機能しないことがある
 
 ============================================================
 🎨 UI / CSS 方針（共通）

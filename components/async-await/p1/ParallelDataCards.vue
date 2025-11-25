@@ -6,10 +6,7 @@
 				<h2 class="text-xl font-semibold text-neutral-100">
 					3. 複数データを並列取得（Promise.all）
 				</h2>
-				<div
-					v-if="data?.duration && !loading"
-					class="text-sm text-neutral-400"
-				>
+				<div v-if="data?.duration && !loading" class="text-sm text-neutral-400">
 					処理時間: {{ data.duration }}ms
 				</div>
 			</div>
@@ -83,18 +80,26 @@
 	</UCard>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import type { ParallelData } from '~/types/async-await/p1/api'
 
-interface Props {
-	data: ParallelData | null
-	loading: boolean
-	error: string | null
-}
-
-defineProps<Props>()
-defineEmits<{
-	fetch: []
-}>()
+export default defineComponent({
+	name: 'ParallelDataCards',
+	props: {
+		data: {
+			type: Object as () => ParallelData | null,
+			default: null,
+		},
+		loading: {
+			type: Boolean,
+			required: true,
+		},
+		error: {
+			type: String as () => string | null,
+			default: null,
+		},
+	},
+	emits: ['fetch'],
+})
 </script>
-

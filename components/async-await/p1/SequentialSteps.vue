@@ -6,10 +6,7 @@
 				<h2 class="text-xl font-semibold text-neutral-100">
 					4. データを順次取得（連続 await）
 				</h2>
-				<div
-					v-if="data?.duration && !loading"
-					class="text-sm text-neutral-400"
-				>
+				<div v-if="data?.duration && !loading" class="text-sm text-neutral-400">
 					処理時間: {{ data.duration }}ms
 				</div>
 			</div>
@@ -72,7 +69,9 @@
 					<div
 						class="flex-1 bg-neutral-900 rounded-lg border border-neutral-800 p-4"
 					>
-						<p class="text-neutral-200 font-medium text-sm">ユーザーデータ取得</p>
+						<p class="text-neutral-200 font-medium text-sm">
+							ユーザーデータ取得
+						</p>
 						<p class="text-neutral-400 text-sm">{{ data.user?.name }}</p>
 					</div>
 				</div>
@@ -81,18 +80,26 @@
 	</UCard>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import type { SequentialData } from '~/types/async-await/p1/api'
 
-interface Props {
-	data: SequentialData | null
-	loading: boolean
-	error: string | null
-}
-
-defineProps<Props>()
-defineEmits<{
-	fetch: []
-}>()
+export default defineComponent({
+	name: 'SequentialSteps',
+	props: {
+		data: {
+			type: Object as () => SequentialData | null,
+			default: null,
+		},
+		loading: {
+			type: Boolean,
+			required: true,
+		},
+		error: {
+			type: String as () => string | null,
+			default: null,
+		},
+	},
+	emits: ['fetch'],
+})
 </script>
-

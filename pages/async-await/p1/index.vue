@@ -51,6 +51,21 @@
 </template>
 
 <script setup lang="ts">
+// Composables を明示的にインポート
+// 注: composables/async-await/p1/ のような深い階層では自動インポートが機能しないため、明示的にインポートします
+import { usePosts } from '~/composables/async-await/p1/usePosts'
+import { useUser } from '~/composables/async-await/p1/useUser'
+import { useParallelData } from '~/composables/async-await/p1/useParallelData'
+import { useSequentialData } from '~/composables/async-await/p1/useSequentialData'
+import { useErrorHandling } from '~/composables/async-await/p1/useErrorHandling'
+
+// Components を明示的にインポート
+import PostList from '~/components/async-await/p1/PostList.vue'
+import UserInfo from '~/components/async-await/p1/UserInfo.vue'
+import ParallelDataCards from '~/components/async-await/p1/ParallelDataCards.vue'
+import SequentialSteps from '~/components/async-await/p1/SequentialSteps.vue'
+import ErrorResultDisplay from '~/components/async-await/p1/ErrorResultDisplay.vue'
+
 // セクション1: useFetch
 const { posts, postsPending, postsError } = usePosts()
 

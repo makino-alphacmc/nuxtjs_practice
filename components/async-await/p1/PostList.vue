@@ -7,7 +7,7 @@
 					1. 投稿データ一覧（useFetch）
 				</h2>
 				<div v-if="posts && !postsPending" class="text-sm text-neutral-400">
-					全{{ posts.length }}件
+					全{{ posts?.length || 0 }}件
 				</div>
 			</div>
 		</template>
@@ -58,7 +58,7 @@
 					</thead>
 					<tbody>
 						<tr
-							v-for="post in posts.slice(0, 10)"
+							v-for="post in (posts || []).slice(0, 10)"
 							:key="post.id"
 							class="border-b border-neutral-800 hover:bg-neutral-800/50 transition-colors"
 						>
@@ -68,9 +68,7 @@
 							<td class="px-4 py-3 text-sm text-neutral-200 font-medium">
 								{{ post.title }}
 							</td>
-							<td
-								class="px-4 py-3 text-sm text-neutral-400 max-w-md truncate"
-							>
+							<td class="px-4 py-3 text-sm text-neutral-400 max-w-md truncate">
 								{{ post.body }}
 							</td>
 							<td class="px-4 py-3 text-sm text-neutral-300">
@@ -80,14 +78,15 @@
 					</tbody>
 				</table>
 				<div class="mt-4 text-sm text-neutral-400 text-center">
-					表示中: 1-10件 / 全{{ posts.length }}件
+					表示中: 1-10件 / 全{{ posts?.length || 0 }}件
 				</div>
 			</div>
 		</div>
 	</UCard>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import type { Post } from '~/types/async-await/p1/api'
 
 interface Props {
@@ -96,6 +95,21 @@ interface Props {
 	postsError: Error | null
 }
 
-defineProps<Props>()
+export default defineComponent({
+	name: 'PostList',
+	props: {
+		posts: {
+			type: Array as () => Post[] | null,
+			default: null,
+		},
+		postsPending: {
+			type: Boolean,
+			required: true,
+		},
+		postsError: {
+			type: Object as () => Error | null,
+			default: null,
+		},
+	},
+})
 </script>
-

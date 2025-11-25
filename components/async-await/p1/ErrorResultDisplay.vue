@@ -36,10 +36,7 @@
 						{{ result.message }}
 					</p>
 				</div>
-				<div
-					v-else
-					class="p-4 bg-red-950/20 rounded-lg border border-red-800"
-				>
+				<div v-else class="p-4 bg-red-950/20 rounded-lg border border-red-800">
 					<div class="flex items-center gap-2 mb-2">
 						<span class="text-red-400 text-xl">✗</span>
 						<p class="text-red-400 font-medium">エラー発生</p>
@@ -75,17 +72,22 @@
 	</UCard>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import type { ErrorHandlingResult } from '~/types/async-await/p1/api'
 
-interface Props {
-	result: ErrorHandlingResult | null
-	loading: boolean
-}
-
-defineProps<Props>()
-defineEmits<{
-	fetch: []
-}>()
+export default defineComponent({
+	name: 'ErrorResultDisplay',
+	props: {
+		result: {
+			type: Object as () => ErrorHandlingResult | null,
+			default: null,
+		},
+		loading: {
+			type: Boolean,
+			required: true,
+		},
+	},
+	emits: ['fetch'],
+})
 </script>
-

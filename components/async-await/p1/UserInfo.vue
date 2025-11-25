@@ -6,11 +6,7 @@
 				<h2 class="text-xl font-semibold text-neutral-100">
 					2. ユーザー情報を手動取得（async/await）
 				</h2>
-				<UButton
-					@click="$emit('fetch')"
-					:loading="loading"
-					color="primary"
-				>
+				<UButton @click="$emit('fetch')" :loading="loading" color="primary">
 					<template v-if="!loading">ユーザー情報を取得</template>
 					<template v-else>取得中...</template>
 				</UButton>
@@ -97,7 +93,8 @@
 	</UCard>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { defineComponent } from 'vue'
 import type { User } from '~/types/async-await/p1/api'
 
 interface Props {
@@ -106,9 +103,22 @@ interface Props {
 	error: string | null
 }
 
-defineProps<Props>()
-defineEmits<{
-	fetch: []
-}>()
+export default defineComponent({
+	name: 'UserInfo',
+	props: {
+		user: {
+			type: Object as () => User | null,
+			default: null,
+		},
+		loading: {
+			type: Boolean,
+			required: true,
+		},
+		error: {
+			type: String as () => string | null,
+			default: null,
+		},
+	},
+	emits: ['fetch'],
+})
 </script>
-
