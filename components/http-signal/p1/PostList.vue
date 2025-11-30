@@ -8,7 +8,7 @@
 				</h2>
 				<UButton
 					:loading="loading"
-					@click="$emit('fetch')"
+					@click="emit('fetch')"
 					color="primary"
 				>
 					一覧を取得
@@ -78,14 +78,14 @@
 									<UButton
 										size="xs"
 										color="blue"
-										@click="$emit('edit', post)"
+										@click="emit('edit', post)"
 									>
 										編集
 									</UButton>
 									<UButton
 										size="xs"
 										color="red"
-										@click="$emit('delete', post.id)"
+										@click="emit('delete', post.id)"
 									>
 										削除
 									</UButton>
@@ -105,23 +105,27 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/http-signal/p1/api'
 
-export default defineComponent({
-	name: 'PostList',
-	props: {
-		posts: {
-			type: Array as () => Post[] | null,
-			default: null,
-		},
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	emits: ['fetch', 'edit', 'delete'],
+// Props の型定義
+interface Props {
+	posts: Post[] | null
+	loading: boolean
+}
+
+// Emits の型定義
+interface Emits {
+	(event: 'fetch'): void
+	(event: 'edit', post: Post): void
+	(event: 'delete', id: number): void
+}
+
+// Props と Emits を定義
+const props = withDefaults(defineProps<Props>(), {
+	posts: null,
 })
+const emit = defineEmits<Emits>()
 </script>
 

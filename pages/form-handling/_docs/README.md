@@ -2,7 +2,9 @@
 
 ## 概要
 
-このセクションでは、Nuxt 3 + Vue 3 を使って入力フォームの基本パターンを練習します。v-model による状態管理、リアルタイムバリデーション、エラー表示、送信処理、リセット処理をひとつのフォームにまとめ、実務でよく使う構成を体験します。
+このセクションでは、Nuxt 3 + Vue 3 を使って入力フォームの基本パターンを練習します。v-model による状態管理、リアルタイムバリデーション、エラー表示、送信処理、リセット処理をひとつのフォームにまとめ、実務でよく使う構成を体験します。**実務で使う処理を重視**し、エラー/ローディング処理も必ず含めた最小構成で実装しています。
+
+**使用 API**: [JSONPlaceholder](https://jsonplaceholder.typicode.com/) のみ（外部 REST API、送信処理で使用）
 
 ## 学習目標
 
@@ -47,37 +49,106 @@ nuxtjs_practice/
 4. [サブミット処理（送信）](./s4_submit.md)
 5. [フォームリセット](./s5_reset.md)
 
-### 1. 型定義の明確化（`types/form-handling/p1/form.ts`）
+## 実務で必須の 4 つの概念
 
-```ts
+すべてのサンプル・課題をこの4概念に基づいて構成します。実務でも学習でも最強の組み合わせです。
+
+### 1. 型定義の明確化（types/）
+
+**目的:**
+- 実行時エラー防止
+- IDE の補完向上
+- データ構造をチームに明示
+
+**実装:**
+```typescript
+// types/form-handling/p1/form.ts
 export interface ContactForm {
-  name: string
-  email: string
-  topic: 'bug' | 'question' | 'request'
-  message: string
-  agree: boolean
+	name: string
+	email: string
+	topic: 'bug' | 'question' | 'request'
+	message: string
+	agree: boolean
 }
 ```
 
-- IDE の補完、型安全なバリデーション実装に不可欠
-- 送信結果 (`SubmitResult`) やバリデーションエラー (`FormValidationError`) も型で管理
+**メリット:**
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（`useContactForm.ts`）
+### 2. コンポーネント分割（UI の単一責任）
 
-- `form`: reactive でフォームの状態を保持
-- `errors`: フィールド毎のエラーを配列で管理
-- `updateField`: 単一の関数でフィールド更新 + バリデーション
-- `submitForm`: バリデーション → 疑似 API 呼び出し → 結果表示
-- `resetForm`: 初期値に戻す
+**目的:**
+- 再利用性
+- 保守性
+- UI の統一感
 
-### 3. コンポーネントの分割
+**実装:**
+```vue
+<!-- components/form-handling/p1/ContactFormCard.vue -->
+<template>
+	<!-- 入力フォーム UI（props で受け取る） -->
+</template>
+```
 
-- `ContactFormCard.vue`: UI + 入力イベントだけを担当し、ロジックは持たない
-- `SubmitResultCard.vue`: 送信結果とバリデーション状態の可視化に専念
+**メリット:**
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
 
-### 4. 明示的なインポート
+### 3. ロジックの分離（composables/）
 
-深い階層のコンポーネント / composable / 型は、自動インポートに頼らず `~/components/...` のように必ず記述してトラブルを防止します。
+**目的:**
+- 重複排除
+- ロジック単体でテスト可能
+- コンポーネントの肥大化防止
+
+**実装:**
+```typescript
+// composables/form-handling/p1/useContactForm.ts
+export const useContactForm = () => {
+	// form: reactive でフォームの状態を保持
+	// errors: フィールド毎のエラーを配列で管理
+	// updateField: 単一の関数でフィールド更新 + バリデーション
+	// submitForm: バリデーション → API 呼び出し → 結果表示
+	// resetForm: 初期値に戻す
+}
+```
+
+**メリット:**
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
+
+### 4. 明示的なインポート（依存明確化）
+
+**目的:**
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
+
+**実装例:**
+```typescript
+// pages/form-handling/p1/index.vue
+// Composables
+import { useContactForm } from '~/composables/form-handling/p1/useContactForm'
+
+// Components
+import ContactFormCard from '~/components/form-handling/p1/ContactFormCard.vue'
+
+// Types
+import type { ContactForm } from '~/types/form-handling/p1/form'
+```
+
+**注意:**
+- Nuxt 組込（$fetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
+
+**メリット:**
+- ✅ 自動インポートが機能しない場合でも確実に動作する
+- ✅ どこから来ているかが明確で、コードレビューがしやすい
+- ✅ 依存関係が明確で、リファクタリングが安全
 
 ### 5. UI / UX
 
@@ -85,13 +156,13 @@ export interface ContactForm {
 - チェックボックス + 同意文面をセットで表示
 - 送信結果を JSON で表示し、実務のデバッグフローを再現
 
-## 実装フロー
+## 実装の流れ（統一パターン）
 
-1. 型定義を作る（ContactForm / SubmitResult / FormValidationError）
-2. Composable でフォームロジックを実装（状態、バリデーション、送信、リセット）
-3. コンポーネントを分割（フォーム UI / 結果 UI）
-4. ページで全てを組み合わせる
-5. `_docs` にまとめてナレッジ化
+1. **型定義を作成**: `types/form-handling/p1/form.ts` で型を定義
+2. **Composable を作成**: `composables/form-handling/p1/useContactForm.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/form-handling/p1/` で UI を分割（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合**: `pages/form-handling/p1/index.vue` で全てを組み合わせる
 
 ## 参考
 

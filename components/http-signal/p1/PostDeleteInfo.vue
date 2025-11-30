@@ -18,11 +18,7 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-	name: 'PostDeleteInfo',
-})
+<script setup lang="ts">
+// このコンポーネントは props や emits を持たないシンプルな表示コンポーネント
 </script>
 

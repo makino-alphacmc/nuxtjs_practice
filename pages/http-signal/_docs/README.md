@@ -2,7 +2,9 @@
 
 ## 概要
 
-このセクションでは、Nuxt 3 + Vue 3 における HTTP 通信の基本操作（CRUD）を学習します。REST API の標準的な操作である GET、POST、PUT、DELETE を実装することで、実務で必要な API 連携の基礎を身につけます。
+このセクションでは、Nuxt 3 + Vue 3 における HTTP 通信の基本操作（CRUD）を学習します。REST API の標準的な操作である GET、POST、PUT、DELETE を実装することで、実務で必要な API 連携の基礎を身につけます。**実務で使う処理を重視**し、エラー/ローディング処理も必ず含めた最小構成で実装しています。
+
+**使用 API**: [JSONPlaceholder](https://jsonplaceholder.typicode.com/) のみ（外部 REST API）
 
 ## 学習目標
 
@@ -110,10 +112,16 @@ nuxtjs_practice/
 
 ## 実務で必須の 4 つの概念
 
-### 1. 型定義の明確化
+すべてのサンプル・課題をこの4概念に基づいて構成します。実務でも学習でも最強の組み合わせです。
 
-`any` を使わずに**型定義を明確に**することで、IDE の補完機能が働き、実行時エラーを防ぐことができます。
+### 1. 型定義の明確化（types/）
 
+**目的:**
+- 実行時エラー防止
+- IDE の補完向上
+- データ構造をチームに明示
+
+**実装:**
 ```typescript
 // types/http-signal/p1/api.ts
 export interface Post {
@@ -131,96 +139,106 @@ export interface CreatePostRequest {
 ```
 
 **メリット:**
-- ✅ IDE が自動補完してくれる
-- ✅ タイポをコンパイル時に検出できる
-- ✅ チーム開発でデータ構造が明確になる
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（Composables）
+### 2. コンポーネント分割（UI の単一責任）
 
-ロジックを**composables**に分離することで、再利用性と保守性が向上します。
+**目的:**
+- 再利用性
+- 保守性
+- UI の統一感
 
+**実装:**
+```vue
+<!-- components/http-signal/p1/PostList.vue -->
+<template>
+	<!-- 投稿一覧 UI（props で受け取る） -->
+</template>
+```
+
+**メリット:**
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
+
+### 3. ロジックの分離（composables/）
+
+**目的:**
+- 重複排除
+- ロジック単体でテスト可能
+- コンポーネントの肥大化防止
+
+**実装:**
 ```typescript
 // composables/http-signal/p1/useHttpPosts.ts
 export const useHttpPosts = () => {
 	const posts = useState<Post[]>('http-posts', () => [])
 	const loading = useState<boolean>('http-posts-loading', () => false)
+	const error = useState<Error | null>('http-posts-error', () => null)
 	
-	const fetchPosts = async () => {
-		// GET リクエストの実装
-	}
+	// GET / POST / PUT / DELETE をまとめて提供
+	const fetchPosts = async () => { /* ... */ }
+	const createPost = async () => { /* ... */ }
+	const updatePost = async () => { /* ... */ }
+	const deletePost = async () => { /* ... */ }
 	
-	return { posts, loading, fetchPosts }
+	return { posts, loading, error, fetchPosts, createPost, updatePost, deletePost }
 }
 ```
 
 **メリット:**
-- ✅ コードの重複を防ぐ
-- ✅ ロジックのテストが容易になる
-- ✅ 変更が一箇所で済む
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
 
-### 3. コンポーネントの分割
-
-大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
-
-```vue
-<!-- components/http-signal/p1/PostList.vue -->
-<template>
-	<UCard>
-		<!-- 投稿一覧のUI -->
-	</UCard>
-</template>
-```
-
-**メリット:**
-- ✅ ファイルが肥大化するのを防ぐ
-- ✅ 再利用性が向上する
-- ✅ 保守性が向上する
-
-### 4. 明示的なインポート（トラブル回避）
+### 4. 明示的なインポート（依存明確化）
 
 **目的:**
-- 自動インポートの不具合を避ける
-- 依存関係を明確にする
-- コードの可読性・保守性を向上させる
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
 
-**実装内容:**
-- Composables は深い階層では明示的にインポート
-- Components も同様に、深い階層では明示的にインポート
-- 型定義は常に明示的にインポート
-
+**実装例:**
 ```typescript
 // pages/http-signal/p1/index.vue
-// Composables を明示的にインポート
+// Composables
 import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
 
-// Components を明示的にインポート
+// Components
 import PostList from '~/components/http-signal/p1/PostList.vue'
 
-// 型定義を明示的にインポート
+// Types
 import type { Post } from '~/types/http-signal/p1/api'
 ```
+
+**注意:**
+- Nuxt 組込（$fetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
 
 **メリット:**
 - ✅ 自動インポートが機能しない場合でも確実に動作する
 - ✅ どこから来ているかが明確で、コードレビューがしやすい
 - ✅ 依存関係が明確で、リファクタリングが安全
 
-## 実装の流れ
+## 実装の流れ（統一パターン）
 
-1. **型定義を作成** - `types/http-signal/p1/api.ts` で型を定義
-2. **Composable を作成** - `composables/http-signal/p1/useHttpPosts.ts` でロジックを分離
-3. **コンポーネントを作成** - `components/http-signal/p1/` で UI を分割
-4. **メインコンポーネントで統合** - `pages/http-signal/p1/index.vue` で全てを組み合わせる
+1. **型定義を作成**: `types/http-signal/p1/api.ts` で型を定義
+2. **Composable を作成**: `composables/http-signal/p1/useHttpPosts.ts` でロジックを分離
+3. **コンポーネントを作成**: `components/http-signal/p1/` で UI を分割（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合**: `pages/http-signal/p1/index.vue` で全てを組み合わせる
 
 ## 使用技術
 
 - **Nuxt 3** - Vue 3 ベースのフレームワーク
-- **Vue 3 Composition API** - リアクティブな状態管理
+- **Vue 3 Composition API** - リアクティブな状態管理（`<script setup>` を使用）
 - **TypeScript** - 型安全性の確保
 - **Nuxt UI** - UI コンポーネントライブラリ
 - **Tailwind CSS** - スタイリング
-- **$fetch** - Nuxt 3 の HTTP クライアント
-- **JSONPlaceholder** - テスト用のフェイク REST API
+- **$fetch** - Nuxt 3 の HTTP クライアント（JSONPlaceholder との通信に使用）
+- **JSONPlaceholder** - テスト用のフェイク REST API（外部 REST API のみ使用）
 
 ## HTTP メソッドの違い
 

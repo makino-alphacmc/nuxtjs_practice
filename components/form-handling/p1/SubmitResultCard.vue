@@ -36,72 +36,65 @@
   </UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, type PropType } from 'vue'
+<script setup lang="ts">
+import { computed } from 'vue'
+// 型定義を明示的にインポート
 import type { FormValidationError, SubmitResult, ContactForm } from '~/types/form-handling/p1/form'
 
-export default defineComponent({
-  name: 'SubmitResultCard',
-  props: {
-    result: {
-      type: Object as PropType<SubmitResult | null>,
-      default: null,
-    },
-    errors: {
-      type: Array as PropType<FormValidationError[]>,
-      default: () => [],
-    },
-    loading: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  setup(props) {
-    const fieldLabels: Record<keyof ContactForm, string> = {
-      name: '氏名',
-      email: 'メールアドレス',
-      topic: 'お問い合わせ種別',
-      message: '本文',
-      agree: '同意',
-    }
+// Props の型定義
+interface Props {
+	result: SubmitResult | null
+	errors: FormValidationError[]
+	loading: boolean
+}
 
-    const statusLabel = computed(() => {
-      if (props.loading) return '送信中'
-      if (props.result?.success) return '送信完了'
-      if (props.errors.length > 0) return '入力不備'
-      return null
-    })
-
-    const statusColor = computed(() => {
-      if (props.loading) return 'yellow'
-      if (props.result?.success) return 'green'
-      if (props.errors.length > 0) return 'red'
-      return 'gray'
-    })
-
-    const formattedPayload = computed(() => {
-      if (!props.result?.payload) return ''
-      return JSON.stringify(props.result.payload, null, 2)
-    })
-
-    const formatDate = (iso: string) => {
-      return new Date(iso).toLocaleString('ja-JP', {
-        hour12: false,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    }
-
-    return {
-      fieldLabels,
-      statusLabel,
-      statusColor,
-      formattedPayload,
-      formatDate,
-    }
-  },
+// Props を定義
+const props = withDefaults(defineProps<Props>(), {
+	result: null,
+	errors: () => [],
+	loading: false,
 })
+
+// フィールドラベル
+const fieldLabels: Record<keyof ContactForm, string> = {
+	name: '氏名',
+	email: 'メールアドレス',
+	topic: 'お問い合わせ種別',
+	message: '本文',
+	agree: '同意',
+}
+
+// ステータスラベル
+const statusLabel = computed(() => {
+	if (props.loading) return '送信中'
+	if (props.result?.success) return '送信完了'
+	if (props.errors.length > 0) return '入力不備'
+	return null
+})
+
+// ステータスカラー
+const statusColor = computed(() => {
+	if (props.loading) return 'yellow'
+	if (props.result?.success) return 'green'
+	if (props.errors.length > 0) return 'red'
+	return 'gray'
+})
+
+// フォーマットされたペイロード
+const formattedPayload = computed(() => {
+	if (!props.result?.payload) return ''
+	return JSON.stringify(props.result.payload, null, 2)
+})
+
+// 日付をフォーマットする関数
+const formatDate = (iso: string) => {
+	return new Date(iso).toLocaleString('ja-JP', {
+		hour12: false,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		hour: '2-digit',
+		minute: '2-digit',
+	})
+}
 </script>

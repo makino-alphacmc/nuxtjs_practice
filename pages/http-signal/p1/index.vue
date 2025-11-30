@@ -47,6 +47,7 @@
 </template>
 
 <script setup lang="ts">
+// 実務で必須の 4 つの概念: 明示的なインポート（依存明確化）
 // Composables を明示的にインポート
 import { useHttpPosts } from '~/composables/http-signal/p1/useHttpPosts'
 

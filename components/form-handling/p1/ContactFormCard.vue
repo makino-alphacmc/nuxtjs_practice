@@ -126,73 +126,42 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from '#imports'
-import type { PropType } from '#imports'
-import type {
-	ContactForm,
-	FormValidationError,
-} from '~/types/form-handling/p1/form'
+<script setup lang="ts">
+// 型定義を明示的にインポート
+import type { ContactForm, FormValidationError } from '~/types/form-handling/p1/form'
 
+// Props の型定義
+interface Props {
+	form: ContactForm
+	errors: FormValidationError[]
+	loading: boolean
+}
+
+// Emits の型定義
 interface UpdatePayload {
 	field: keyof ContactForm
 	value: ContactForm[keyof ContactForm]
 }
 
-interface ContactFormEmit {
+interface Emits {
 	(event: 'update-field', payload: UpdatePayload): void
 	(event: 'submit'): void
 	(event: 'reset'): void
 }
 
-export default defineComponent({
-	name: 'ContactFormCard',
-	props: {
-		form: {
-			type: Object as PropType<ContactForm>,
-			required: true,
-		},
-		errors: {
-			type: Array as PropType<FormValidationError[]>,
-			required: true,
-		},
-		loading: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	emits: {
-		'update-field': (payload: UpdatePayload) => Boolean(payload),
-		submit: () => true,
-		reset: () => true,
-	},
-	setup(
-		props: Readonly<{
-			form: ContactForm
-			errors: FormValidationError[]
-			loading: boolean
-		}>,
-		context: { emit: ContactFormEmit }
-	) {
-		const { emit } = context
-		const topicOptions = [
-			{ label: '不具合の報告', value: 'bug' },
-			{ label: '使い方の質問', value: 'question' },
-			{ label: '機能のリクエスト', value: 'request' },
-		]
+// Props と Emits を定義
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
-		const fieldError = (field: keyof ContactForm) => {
-			return (
-				props.errors.find((error: FormValidationError) => error.field === field)
-					?.message ?? null
-			)
-		}
+// トピックオプション
+const topicOptions = [
+	{ label: '不具合の報告', value: 'bug' },
+	{ label: '使い方の質問', value: 'question' },
+	{ label: '機能のリクエスト', value: 'request' },
+]
 
-		return {
-			topicOptions,
-			emit,
-			fieldError,
-		}
-	},
-})
+// フィールドエラーを取得する関数
+const fieldError = (field: keyof ContactForm) => {
+	return props.errors.find((error) => error.field === field)?.message ?? null
+}
 </script>

@@ -57,7 +57,7 @@
 
 <script setup lang="ts">
 // 型定義を明示的にインポート
-import type { UpdatePostRequest } from '~/types/crud-operations/p1/api'
+import type { UpdatePostRequest } from '~/types/http-signal/p1/api'
 
 interface Props {
 	editingPost: UpdatePostRequest | null

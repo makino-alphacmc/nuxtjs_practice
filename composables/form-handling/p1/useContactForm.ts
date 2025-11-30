@@ -86,15 +86,34 @@ export const useContactForm = () => {
   }
 
   const submitForm = async () => {
+    // バリデーション通過を確認
     if (!validateForm()) {
       return { success: false, error: new Error('入力内容を確認してください') }
     }
 
+    // ローディング状態を ON
     isSubmitting.value = true
     submitResult.value = null
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // JSONPlaceholder に POST リクエストを送信
+      // 実務では実際の API エンドポイントに置き換える
+      const response = await $fetch<{ id: number; [key: string]: unknown }>(
+        'https://jsonplaceholder.typicode.com/posts',
+        {
+          method: 'POST',
+          body: {
+            title: form.name,
+            body: form.message,
+            userId: 1,
+            email: form.email,
+            topic: form.topic,
+            agree: form.agree,
+          },
+        }
+      )
+
+      // 結果を保持 & UI に反映
       const result: SubmitResult = {
         success: true,
         timestamp: new Date().toISOString(),
@@ -104,9 +123,11 @@ export const useContactForm = () => {
       resetForm()
       return { success: true, data: result }
     } catch (error) {
+      // 例外処理: エラーメッセージを統一
       const err = error instanceof Error ? error : new Error('送信に失敗しました')
       return { success: false, error: err }
     } finally {
+      // finally ブロック: 成功・失敗どちらでもローディング解除
       isSubmitting.value = false
     }
   }

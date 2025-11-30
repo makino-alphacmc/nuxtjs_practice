@@ -15,7 +15,7 @@ nuxtjs_practice/
 ## 実務で必須の 4 つの概念
 
 1. **型定義の明確化** – `ContactForm` で各フィールドの型と選択肢を定義
-2. **コンポーネント分割** – フォーム UI を `ContactFormCard.vue` に切り出し、親はロジックに集中
+2. **コンポーネント分割** – フォーム UI を `ContactFormCard.vue` に切り出し、親はロジックに集中（props で受け取る）
 3. **ロジックの分離** – `useContactForm()` にフォーム状態と更新関数を集約
 4. **明示的なインポート** – 深い階層から `~/components/...`、`~/composables/...`、`~/types/...` を必ず記述
 
@@ -54,6 +54,9 @@ const handleFieldUpdate = ({ field, value }: { field: keyof ContactForm; value: 
 
 ## まとめ
 
-1. `ContactForm` の型を定義してから実装を始める
-2. v-model は `:model-value` と `@update:model-value` セットで統一
-3. 親は `updateField()` でロジック集中、子は UI 専念
+1. **型定義を作成**: `ContactForm` の型を定義してから実装を始める
+2. **v-model の実装**: `:model-value` と `@update:model-value` セットで統一
+3. **ロジックの分離**: 親は `updateField()` でロジック集中、子は UI 専念（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+
+このセクションでは、`v-model`の基本的な使い方と、実務で必須の 4 つの概念（型定義・コンポーネント分割・ロジックの分離・明示的なインポート）を学びました。次のセクションでは、バリデーション（入力チェック）の実装方法を学びます。
