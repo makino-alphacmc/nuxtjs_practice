@@ -1,348 +1,220 @@
-============================================================
-🎯 基本設定
-============================================================
-技術スタック:
+📝 Nuxt3 + JSONPlaceholder 学習メモ（最新版・統合版）
 
-- Nuxt 3 + Vue 3 + TypeScript
-- UI: Nuxt UI（または shadcn-vue 相当）+ Tailwind CSS
-- 外部 REST API: JSONPlaceholder（これだけ使用）
-  https://jsonplaceholder.typicode.com/
-- 実行環境: Cursor
-- 作業フォルダ: nuxtjs_practice（Nuxt プロジェクト）
+============================================================
+
+🎯 基本設定（変わらず）
+
+技術スタック:
+	•	Nuxt 3 + Vue 3 + TypeScript
+	•	UI: Nuxt UI（または shadcn-vue 相当）+ Tailwind CSS
+	•	外部 REST API: JSONPlaceholder のみ
+https://jsonplaceholder.typicode.com/
+	•	実行環境: Cursor
+	•	作業フォルダ: nuxtjs_practice
 
 制約（重要）:
-
-- server/api（自作 API）は使わない
-- Prisma / DB を使わない
-- 外部 API（JSONPlaceholder）だけで CRUD も練習する
-- 全部フロントで完結する学習フローにする
-
-============================================================
-📌 Nuxt で使う基本機能（外部 API 学習に必要なものだけ）
-============================================================
-
-- <script setup>
-- useFetch / useAsyncData（API 取得）
-- useRoute / useRouter（ルーティング）
-- useState（簡易グローバル状態）
-- composables（共通処理）
-- middleware（認証ガードなど）
-- Tailwind CSS（UI 調整）
-- Nuxt UI（Card / Button / Input / Textarea）
+	•	server/api（自作 API）は使わない
+	•	Prisma / DB を使わない
+	•	外部 API（JSONPlaceholder）だけで CRUD する
+	•	すべてフロント側だけで完結する学習フロー
 
 ============================================================
-🏗️ 実務で必須の 4 つの概念
+
+📌 Nuxt で使う基本機能（外部 API に必要な範囲だけ）
+	•	<script setup>
+	•	useFetch / useAsyncData（API 取得）
+	•	useRoute / useRouter（ルーティング）
+	•	useState（簡易グローバル）
+	•	composables（共通ロジック）
+	•	middleware
+	•	Tailwind CSS
+	•	Nuxt UI（Card / Button / Input / Textarea）
+
+※ 不要な機能・パターンは敢えて使わない（学習効率↑）
+
 ============================================================
 
-## 1. 型定義の明確化（`any` の使用を減らす）
+🏗️ 実務で必須の 4 つの概念（＋学習しやすい最小構成で統一）
 
-**目的:**
+実務でも学習でも最強の組み合わせ。
+すべてのサンプル・課題をこの4概念に基づいて構成する。
 
-- 実行時エラーを防ぐ
-- IDE の補完機能を活用する
-- チーム開発でデータ構造を明確にする
+⸻
 
-**実装内容:**
+1. 型定義の明確化（types/）
 
-- `types/async-await/p1/api.ts` に型定義を作成
-- `Post` インターフェースを定義
-- `useFetch<Post[]>` のように型を指定して使用
+目的
+	•	実行時エラー防止
+	•	IDE の補完向上
+	•	データ構造をチームに明示
 
-**メリット:**
+実装
+	•	types/async-await/.../api.ts
+	•	Post, User, Comment などの型
+	•	useFetch<Post[]> のように必ず型指定
 
-- ✅ タイポをコンパイル時に検出できる
-- ✅ IDE が自動補完してくれる
-- ✅ リファクタリングが安全にできる
+メリット
+	•	タイポや不整合を即検知
+	•	自動補完が強くなる
+	•	安全にリファクタ可能
 
----
+⸻
 
-## 2. コンポーネントの分割（再利用性・保守性向上）
+2. コンポーネント分割（UI の単一責任）
 
-**目的:**
+目的
+	•	再利用性
+	•	保守性
+	•	UI の統一感
 
-- ファイルの肥大化を防ぐ
-- UI コンポーネントの再利用性を向上させる
-- 保守性を向上させる
+実装
+	•	components/.../PostList.vue
+	•	必ず「props で受け取る」
+	•	“一覧表示だけ”など単一責務ルールを徹底
 
-**実装内容:**
+メリット
+	•	複数ページで再利用可能
+	•	修正箇所が最小
+	•	理解しやすい
 
-- `components/async-await/p1/PostList.vue` に投稿一覧コンポーネントを作成
-- 親コンポーネントから props でデータを受け取る
-- 単一責任の原則に従って分割
+⸻
 
-**メリット:**
+3. ロジックの分離（composables/）
 
-- ✅ 複数のページで同じ UI を使える
-- ✅ 変更が一箇所で済む
-- ✅ ファイルが小さくなり、理解しやすくなる
-- ✅ コンポーネント単位でテストできる
+目的
+	•	重複排除
+	•	ロジック単体でテスト可能
+	•	コンポーネントの肥大化防止
 
----
+実装
+	•	composables/.../usePosts.ts
+	•	GET / POST / PUT / DELETE をまとめて提供
+	•	API URL・fetch ロジックをここに集約
 
-## 3. ロジックの分離（Composables の活用）
+メリット
+	•	どのページでも同じロジックを使える
+	•	保守性が圧倒的に上がる
+	•	UI がシンプルに保てる
 
-**目的:**
+⸻
 
-- コードの重複を防ぐ
-- ロジックのテストを容易にする
-- 変更を一箇所に集約する
+4. 明示的なインポート（依存明確化）
 
-**実装内容:**
+目的
+	•	自動インポート不発バグの防止
+	•	読みやすさ向上
+	•	依存関係の透明化
 
-- `composables/async-await/p1/usePosts.ts` に composable を作成
-- `useFetch` を使ったデータ取得ロジックを分離
-- 関連する関数（`getPostById`、`getPostsByUserId` など）も含める
+実装例:
 
-**メリット:**
-
-- ✅ 複数のページで同じロジックを使える
-- ✅ ロジックだけをテストできる
-- ✅ 変更が一箇所で済む
-- ✅ コンポーネントがシンプルになる
-
----
-
-## 4. 明示的なインポート（トラブル回避）
-
-**目的:**
-
-- 自動インポートの不具合を避ける
-- 依存関係を明確にする
-- コードの可読性・保守性を向上させる
-
-**実装内容:**
-
-- Composables は深い階層（`composables/async-await/p1/`）では自動インポートが機能しないため、明示的にインポート
-- Components も同様に、深い階層では明示的にインポート
-- 型定義は常に明示的にインポート
-
-**実装例:**
-
-```typescript
-// Composables を明示的にインポート
+// Composables
 import { usePosts } from '~/composables/async-await/p1/usePosts'
-import { useUser } from '~/composables/async-await/p1/useUser'
 
-// Components を明示的にインポート
+// Components
 import PostList from '~/components/async-await/p1/PostList.vue'
-import UserInfo from '~/components/async-await/p1/UserInfo.vue'
 
-// 型定義を明示的にインポート
-import type { Post, User } from '~/types/async-await/p1/api'
-```
+// Types
+import type { Post } from '~/types/async-await/p1/api'
 
-**メリット:**
-
-- ✅ 自動インポートが機能しない場合でも確実に動作する
-- ✅ どこから来ているかが明確で、コードレビューがしやすい
-- ✅ 依存関係が明確で、リファクタリングが安全
-- ✅ チーム開発で混乱を避けられる
-
-**注意事項:**
-
-- Nuxt 3 の組み込み関数（`useFetch`, `useRoute`, `useRouter`など）は自動インポートで問題なし
-- `components/`の直下のコンポーネントは自動インポートが機能するが、深い階層では機能しないことがある
-- `composables/`の直下の composables は自動インポートが機能するが、深い階層では機能しないことがある
+注意
+	•	Nuxt 組込（useFetch 等）は auto-import OK
+	•	components / composables は深い階層だと auto import NG
 
 ============================================================
+
 🎨 UI / CSS 方針（共通）
-============================================================
-Nuxt UI をベースに、Tailwind でレイアウトを作る。
+
+Nuxt UI を基礎に、Tailwind で軽く整える。
 
 よく使う Tailwind:
-flex / grid / gap-4 / p-4
-rounded-xl / shadow
-w-full / max-w-2xl / mx-auto
+flex / grid / gap-4 / p-4 / rounded-xl / shadow / w-full / max-w-2xl / mx-auto
 
-ダークテーマ基準:
+ダークテーマ:
+	•	背景: bg-neutral-900
+	•	カード: bg-neutral-950
+	•	テキスト: text-neutral-100
 
-- 背景: bg-neutral-900
-- カード: bg-neutral-950
-- テキスト: text-neutral-100
-
-assets/css/main.css:
-
-- Tailwind の読み込み
-- ダークテーマ用 CSS 変数:
-  --background
-  --foreground
-  --primary
-- 最低限の共通スタイルのみ
+assets/css/main.css
+	•	Tailwind 読み込み
+	•	ダークテーマ変数
+	•	最小限の共通スタイルのみ
 
 ============================================================
-📚 学習フェーズ（3 ステップ固定）
-============================================================
 
----
+📚 学習フェーズ（実務 × 学習効率の最適化）
 
-## Phase 1：サンプルで理解（AI がコードを書く）
+あなたの意図通り、「実務で使う流れそのまま」 に学習を合わせた。
+
+⸻
+
+Phase 1：AI がフルコードを作成（最小構成・実務仕様）
 
 目的:
-AI がフルコードを提供 → あなたは動かして理解する
+	•	動く実装を見て理解する
+	•	1ファイル完結
+	•	JSONPlaceholder を完全活用
+	•	実務で使うエラー / ローディングも必ず入れる
 
-AI がやること:
+サンプル例:
+	1.	投稿一覧（GET /posts）
+	2.	投稿詳細（GET /posts/:id）
+	3.	作成（POST）
+	4.	更新（PUT）
+	5.	削除（DELETE）
+	6.	検索・フィルタ
+	7.	クエリパラメータで絞り込み
 
-- 1 ファイル完結の Nuxt ページを作成
-- npm run dev で即動く
-- 1 行ずつ丁寧に説明
-- 必ず JSONPlaceholder を使った例にする
+⸻
 
-サンプル候補:
-
-1. 投稿一覧（GET /posts）
-2. 投稿詳細（GET /posts/:id）
-3. 新規投稿フォーム（POST）
-4. 更新フォーム（PUT）
-5. 削除ボタン（DELETE）
-6. エラー表示 / ローディング表示
-7. 検索 + filter
-8. URL クエリでフィルタ
-
-あなたは「Phase1 の ○○ サンプルやって」と指定するだけで OK。
-
----
-
-## Phase 2：自力再現（ヒントだけで書く）
+Phase 2：AI のサポート最小化 → あなたが書く
 
 AI が出すもの:
-
-- ファイル名
-- 必要なフック名（useFetch など）
-- 使う UI コンポーネント名
-- Tailwind クラスのヒント
-- 完成 UI の文章イメージ
+	•	ファイル構成
+	•	使う composable 名
+	•	UI ヒント
+	•	Tailwind 例
 
 AI が出さないもの:
+	•	コード本体（100% 自分で書く）
 
-- コード本体
+⸻
 
-あなたは完全に自力で書く → 詰まったところだけ質問する。
+Phase 3：実務の反復練習（posts / users / comments / todos）
+	•	一覧 → 詳細 → 作成 → 更新 → 削除
+	•	useState でお気に入り
+	•	middleware でログイン必須風
+	•	デバウンス付き検索
+	•	createdAt 風ダミー日付でソート練習
 
----
-
-## Phase 3：応用・ランダム練習
-
-題材を変えて同じパターンを反復する。
-
-ラウンドロビン方式で練習:
-
-- posts
-- users
-- comments
-- todos
-
-ランダム課題例:
-
-- 一覧 → 詳細 → 作成 → 更新 → 削除 を連続で実装
-- URL クエリで絞り込み
-- useState でお気に入り機能
-- middleware で「ログイン必須」風ガード
-- デバウンス付き検索（タイピング時の負荷軽減）
-- 日付ソート（createdAt 風の疑似日付で練習）
-
-目標:
-Nuxt + 外部 API を使った「実務パターン」を身体で覚える。
+目的:
+Nuxt x 外部 API の黄金パターンを身体に染み込ませる。
 
 ============================================================
-📌 JSONPlaceholder とは
-============================================================
-JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。
-https://jsonplaceholder.typicode.com/
 
-特徴:
+📌 JSONPlaceholder（学習用 API）
 
-- 無料で利用可能（月間約 30 億リクエストを処理）
-- 実際のバックエンドサーバー不要でフロントエンド開発が可能
-- 標準的な REST API の動作を学習できる
-- JSON Server + LowDB で構築されている
-- すべての HTTP メソッド（GET / POST / PUT / PATCH / DELETE）をサポート
-
-提供リソース:
-
-- /posts（100 件の投稿データ）
-- /comments（500 件のコメント）
-- /albums（100 件のアルバム）
-- /photos（5000 件の写真）
-- /todos（200 件のタスク）
-- /users（10 件のユーザー情報）
-
-リソース間の関係:
-
-- posts には複数の comments が紐づく
-- albums には複数の photos が紐づく
-- 例: GET /posts/1/comments で投稿 ID 1 のコメント一覧を取得可能
-
-なぜ JSONPlaceholder を使うのか:
-
-1. バックエンド開発の知識がなくてもフロントエンド学習に集中できる
-2. 実際の API と同じ形式で CRUD 操作を練習できる
-3. エラーハンドリングやローディング状態の実装を学べる
-4. 複数の API を並列で呼び出す練習ができる
-5. 無料で制限なく利用できる（学習用途に最適）
-
-============================================================
-📌 JSONPlaceholder API（固定で使用）
-============================================================
 ベース URL:
 https://jsonplaceholder.typicode.com
 
-一覧取得:
-GET https://jsonplaceholder.typicode.com/posts
-GET https://jsonplaceholder.typicode.com/users
-GET https://jsonplaceholder.typicode.com/comments
-（他も同様）
+使用リソース:
+	•	/posts
+	•	/users
+	•	/comments
+	•	/todos
 
-詳細取得:
-GET https://jsonplaceholder.typicode.com/posts/:id
-GET https://jsonplaceholder.typicode.com/users/:id
-（例: /posts/1 で ID 1 の投稿を取得）
+（実務 API と同じ REST の動きで学習できる）
 
-作成:
-POST https://jsonplaceholder.typicode.com/posts
-Body: { "title": "...", "body": "...", "userId": 1 }
-※実際には保存されないが、レスポンスで ID が返る
-
-更新:
-PUT https://jsonplaceholder.typicode.com/posts/:id
-Body: { "id": 1, "title": "...", "body": "...", "userId": 1 }
-※実際には更新されないが、送信したデータがそのまま返る
-
-部分更新:
-PATCH https://jsonplaceholder.typicode.com/posts/:id
-Body: { "title": "新しいタイトル" }
-※指定したフィールドのみ更新（実際には保存されない）
-
-削除:
-DELETE https://jsonplaceholder.typicode.com/posts/:id
-※実際には削除されないが、空のオブジェクト {} が返る
-
-関連データ取得:
-GET https://jsonplaceholder.typicode.com/posts/:id/comments
-GET https://jsonplaceholder.typicode.com/comments?postId=1
-（クエリパラメータでフィルタリング可能）
-
-その他の題材:
-/users（ユーザー情報）
-/comments（コメント）
-/todos（タスク）
-/albums（アルバム）
-/photos（写真）
-
-注意事項:
-
-- 実際のデータベースは存在しないため、POST / PUT / DELETE は
-  実際にはデータを変更しない（レスポンスのみ返る）
-- 学習目的では問題ないが、本番環境では使用しない
-- すべてのリクエストは HTTP と HTTPS の両方で利用可能
+注意:
+	•	実際の DB はないため変更は保存されない（レスポンスのみ返る）
+	•	学習には問題なし
 
 ============================================================
-📌 メモの使い方
+
+📌 メモの使い方（統一）
+	1.	「Phase1 の ○○ 作って」と命令
+	2.	コードを動かして理解
+	3.	「Phase2 の ○○ の課題出して」へ
+	4.	自力で実装
+	5.	Phase3 で応用反復
+
 ============================================================
-
-1. Phase1 の題材を選んで「これ書いて」と AI に指示
-2. もらったコードを見ながら動作確認
-3. 次は「Phase2 の ○○ の課題出して」と切り替える
-4. 自力で書く
-5. # Phase3 で題材を変えて反復
-
-# メモはここまで。自由にコピペ OK。
