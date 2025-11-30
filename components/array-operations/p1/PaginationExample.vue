@@ -63,43 +63,27 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/array-operations/p1/api'
 
-export default defineComponent({
-	name: 'PaginationExample',
-	props: {
-		currentPage: {
-			type: Number,
-			required: true,
-		},
-		itemsPerPage: {
-			type: Number,
-			required: true,
-		},
-		totalPages: {
-			type: Number,
-			required: true,
-		},
-		totalItems: {
-			type: Number,
-			required: true,
-		},
-		startIndex: {
-			type: Number,
-			required: true,
-		},
-		endIndex: {
-			type: Number,
-			required: true,
-		},
-		paginatedPosts: {
-			type: Array as () => Post[],
-			required: true,
-		},
-	},
-	emits: ['update:itemsPerPage', 'prevPage', 'nextPage'],
-})
+interface Props {
+	currentPage: number
+	itemsPerPage: number
+	totalPages: number
+	totalItems: number
+	startIndex: number
+	endIndex: number
+	paginatedPosts: Post[]
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	'update:itemsPerPage': [value: string | number]
+	prevPage: []
+	nextPage: []
+}>()
 </script>
 

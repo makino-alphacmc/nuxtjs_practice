@@ -207,84 +207,43 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/crud-operations/p1/api'
 
-export default defineComponent({
-	name: 'PostListWithOperations',
-	props: {
-		posts: {
-			type: Array as () => Post[],
-			required: true,
-		},
-		paginatedPosts: {
-			type: Array as () => Post[],
-			required: true,
-		},
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-		searchQuery: {
-			type: String,
-			default: '',
-		},
-		filterUserId: {
-			type: Number as () => number | null,
-			default: null,
-		},
-		sortBy: {
-			type: String as () => 'id' | 'title' | 'userId',
-			required: true,
-		},
-		sortOrder: {
-			type: String as () => 'asc' | 'desc',
-			required: true,
-		},
-		currentPage: {
-			type: Number,
-			required: true,
-		},
-		totalPages: {
-			type: Number,
-			required: true,
-		},
-		itemsPerPage: {
-			type: Number,
-			required: true,
-		},
-		totalItems: {
-			type: Number,
-			required: true,
-		},
-		filteredCount: {
-			type: Number,
-			required: true,
-		},
-		startIndex: {
-			type: Number,
-			required: true,
-		},
-		endIndex: {
-			type: Number,
-			required: true,
-		},
-	},
-	emits: [
-		'update:searchQuery',
-		'update:filterUserId',
-		'update:sortBy',
-		'toggleSortOrder',
-		'update:itemsPerPage',
-		'prevPage',
-		'nextPage',
-		'clearSearch',
-		'clearFilter',
-		'clearAllFilters',
-		'edit',
-		'delete',
-	],
-})
+interface Props {
+	posts: Post[]
+	paginatedPosts: Post[]
+	loading: boolean
+	searchQuery: string
+	filterUserId: number | null
+	sortBy: 'id' | 'title' | 'userId'
+	sortOrder: 'asc' | 'desc'
+	currentPage: number
+	totalPages: number
+	itemsPerPage: number
+	totalItems: number
+	filteredCount: number
+	startIndex: number
+	endIndex: number
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	'update:searchQuery': [value: string]
+	'update:filterUserId': [value: string | null]
+	'update:sortBy': [value: 'id' | 'title' | 'userId']
+	toggleSortOrder: []
+	'update:itemsPerPage': [value: string | number]
+	prevPage: []
+	nextPage: []
+	clearSearch: []
+	clearFilter: []
+	clearAllFilters: []
+	edit: [post: Post]
+	delete: [id: number]
+}>()
 </script>
 

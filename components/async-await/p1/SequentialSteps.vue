@@ -80,26 +80,20 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { SequentialData } from '~/types/async-await/p1/api'
 
-export default defineComponent({
-	name: 'SequentialSteps',
-	props: {
-		data: {
-			type: Object as () => SequentialData | null,
-			default: null,
-		},
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-		error: {
-			type: String as () => string | null,
-			default: null,
-		},
-	},
-	emits: ['fetch'],
-})
+interface Props {
+	data: SequentialData | null
+	loading: boolean
+	error: string | null
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	fetch: []
+}>()
 </script>

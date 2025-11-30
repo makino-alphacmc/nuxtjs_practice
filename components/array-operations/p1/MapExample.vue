@@ -29,22 +29,18 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/array-operations/p1/api'
 
 interface MappedPost extends Post {
 	uppercaseTitle: string
 }
 
-export default defineComponent({
-	name: 'MapExample',
-	props: {
-		mappedPosts: {
-			type: Array as () => MappedPost[],
-			required: true,
-		},
-	},
-})
+interface Props {
+	mappedPosts: MappedPost[]
+}
+
+defineProps<Props>()
 </script>
 

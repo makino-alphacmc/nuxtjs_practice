@@ -80,26 +80,20 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { ParallelData } from '~/types/async-await/p1/api'
 
-export default defineComponent({
-	name: 'ParallelDataCards',
-	props: {
-		data: {
-			type: Object as () => ParallelData | null,
-			default: null,
-		},
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-		error: {
-			type: String as () => string | null,
-			default: null,
-		},
-	},
-	emits: ['fetch'],
-})
+interface Props {
+	data: ParallelData | null
+	loading: boolean
+	error: string | null
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	fetch: []
+}>()
 </script>

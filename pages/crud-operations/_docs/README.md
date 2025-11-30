@@ -2,7 +2,9 @@
 
 ## 概要
 
-このセクションでは、Nuxt 3 + Vue 3 における CRUD 操作と配列操作を組み合わせた実践的な実装を学習します。API通信（GET/POST/PUT/DELETE）と配列操作（検索・フィルタ・ソート・ページネーション）を統合することで、実務でよく使われるパターンを身につけます。
+このセクションでは、Nuxt 3 + Vue 3 における CRUD 操作と配列操作を組み合わせた実践的な実装を学習します。**実務で使う処理を重視**し、エラー/ローディング処理も必ず含めた最小構成で実装しています。
+
+**使用 API**: [JSONPlaceholder](https://jsonplaceholder.typicode.com/) のみ（外部 REST API）
 
 ## 学習目標
 
@@ -56,8 +58,8 @@ nuxtjs_practice/
 - `types/crud-operations/p1/api.ts` - Post 型定義
 
 **特徴:**
-- `$fetch` を使った手動での HTTP リクエスト
-- ローディング状態・エラー状態を手動で管理
+- `$fetch` を使った手動での HTTP リクエスト（実務でよく使う方法）
+- ローディング状態・エラー状態を手動で管理（実務で必須）
 - 取得したデータを配列操作で処理
 
 **詳細:** [s1_get.md](./s1_get.md) を参照
@@ -128,10 +130,16 @@ nuxtjs_practice/
 
 ## 実務で必須の 4 つの概念
 
-### 1. 型定義の明確化
+すべてのサンプル・課題をこの4概念に基づいて構成します。実務でも学習でも最強の組み合わせです。
 
-`any` を使わずに**型定義を明確に**することで、IDE の補完機能が働き、実行時エラーを防ぐことができます。
+### 1. 型定義の明確化（types/）
 
+**目的:**
+- 実行時エラー防止
+- IDE の補完向上
+- データ構造をチームに明示
+
+**実装:**
 ```typescript
 // types/crud-operations/p1/api.ts
 export interface Post {
@@ -143,62 +151,74 @@ export interface Post {
 ```
 
 **メリット:**
-- ✅ IDE が自動補完してくれる
-- ✅ タイポをコンパイル時に検出できる
-- ✅ チーム開発でデータ構造が明確になる
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（Composables）
+### 2. コンポーネント分割（UI の単一責任）
 
-ロジックを**composables**に分離することで、再利用性と保守性が向上します。
+**目的:**
+- 再利用性
+- 保守性
+- UI の統一感
 
-```typescript
-// composables/crud-operations/p1/useCrudWithArrayOperations.ts
-export const useCrudWithArrayOperations = () => {
-	// API通信 + 配列操作のロジック
-}
-```
-
-**メリット:**
-- ✅ コードの重複を防ぐ
-- ✅ ロジックのテストが容易になる
-- ✅ 変更が一箇所で済む
-
-### 3. コンポーネントの分割
-
-大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
-
+**実装:**
 ```vue
 <!-- components/crud-operations/p1/PostListWithOperations.vue -->
 <template>
-	<!-- 検索・フィルタ・ソート・ページネーション付き投稿一覧 -->
+	<!-- 検索・フィルタ・ソート・ページネーション付き投稿一覧（props で受け取る） -->
 </template>
 ```
 
 **メリット:**
-- ✅ ファイルが肥大化するのを防ぐ
-- ✅ 再利用性が向上する
-- ✅ 保守性が向上する
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
 
-### 4. 明示的なインポート（トラブル回避）
+### 3. ロジックの分離（composables/）
 
 **目的:**
-- 自動インポートの不具合を避ける
-- 依存関係を明確にする
-- コードの可読性・保守性を向上させる
+- 重複排除
+- ロジック単体でテスト可能
+- コンポーネントの肥大化防止
 
-**実装内容:**
-- Composables は深い階層では明示的にインポート
-- Components も同様に、深い階層では明示的にインポート
-- 型定義は常に明示的にインポート
+**実装:**
+```typescript
+// composables/crud-operations/p1/useCrudWithArrayOperations.ts
+export const useCrudWithArrayOperations = () => {
+	// GET / POST / PUT / DELETE をまとめて提供
+	// API URL・fetch ロジックをここに集約
+}
+```
 
+**メリット:**
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
+
+### 4. 明示的なインポート（依存明確化）
+
+**目的:**
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
+
+**実装例:**
 ```typescript
 // pages/crud-operations/p1/index.vue
-// Composables を明示的にインポート
+// Composables
 import { useCrudWithArrayOperations } from '~/composables/crud-operations/p1/useCrudWithArrayOperations'
 
-// Components を明示的にインポート
+// Components
 import PostListWithOperations from '~/components/crud-operations/p1/PostListWithOperations.vue'
+
+// Types
+import type { Post } from '~/types/crud-operations/p1/api'
 ```
+
+**注意:**
+- Nuxt 組込（$fetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
 
 **メリット:**
 - ✅ 自動インポートが機能しない場合でも確実に動作する
@@ -213,22 +233,33 @@ import PostListWithOperations from '~/components/crud-operations/p1/PostListWith
 2. **配列操作**: 取得したデータに対して検索・フィルタ・ソート・ページネーションを適用
 3. **CRUD操作**: 作成・更新・削除時に配列操作の結果も自動的に更新
 
-## 実装の流れ
+## 実装の流れ（統一パターン）
+
+すべてのセクションで以下の流れで実装します：
 
 1. **型定義を作成** - `types/crud-operations/p1/api.ts` で型を定義
 2. **Composable を作成** - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` でロジックを分離
-3. **コンポーネントを作成** - `components/crud-operations/p1/PostListWithOperations.vue` で UI を分割
-4. **メインコンポーネントで統合** - `pages/crud-operations/p1/index.vue` で全てを組み合わせる
+3. **コンポーネントを作成** - `components/crud-operations/p1/PostListWithOperations.vue` で UI を分割（props で受け取る）
+4. **明示的なインポート** - 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合** - `pages/crud-operations/p1/index.vue` で全てを組み合わせる
 
 ## 使用技術
 
 - **Nuxt 3** - Vue 3 ベースのフレームワーク
 - **Vue 3 Composition API** - リアクティブな状態管理
 - **TypeScript** - 型安全性の確保
-- **Nuxt UI** - UI コンポーネントライブラリ
-- **Tailwind CSS** - スタイリング
-- **$fetch** - Nuxt 3 の HTTP クライアント
-- **JSONPlaceholder** - テスト用のフェイク REST API
+- **Nuxt UI** - UI コンポーネントライブラリ（Card / Button / Input / Textarea）
+- **Tailwind CSS** - スタイリング（ダークテーマ対応）
+- **$fetch** - Nuxt 3 の HTTP クライアント（実務でよく使う方法）
+- **JSONPlaceholder** - 外部 REST API（学習用）
+
+## 実務で必須のポイント
+
+- ✅ **エラー/ローディング処理は必ず含める** - 実務では必須
+- ✅ **型定義を明確に** - `any` を使わない
+- ✅ **コンポーネントは props で受け取る** - 再利用性を重視
+- ✅ **ロジックは composables に分離** - 保守性を向上
+- ✅ **深い階層では明示的にインポート** - トラブル回避
 
 ## 参考資料
 

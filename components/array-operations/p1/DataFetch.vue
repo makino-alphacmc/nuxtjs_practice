@@ -21,22 +21,18 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
+interface Props {
+	loading: boolean
+	postsCount: number
+}
 
-export default defineComponent({
-	name: 'DataFetch',
-	props: {
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-		postsCount: {
-			type: Number,
-			required: true,
-		},
-	},
-	emits: ['fetch'],
-})
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	fetch: []
+}>()
 </script>
 

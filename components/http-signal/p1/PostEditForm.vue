@@ -55,54 +55,47 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
-import type { UpdatePostRequest } from '~/types/http-signal/p1/api'
+<script setup lang="ts">
+// 型定義を明示的にインポート
+import type { UpdatePostRequest } from '~/types/crud-operations/p1/api'
 
-export default defineComponent({
-	name: 'PostEditForm',
-	props: {
-		editingPost: {
-			type: Object as () => UpdatePostRequest | null,
-			default: null,
-		},
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	emits: ['update', 'cancel'],
-	setup(props, { emit }) {
-		const editingPost = ref<UpdatePostRequest | null>(props.editingPost)
+interface Props {
+	editingPost: UpdatePostRequest | null
+	loading: boolean
+}
 
-		watch(
-			() => props.editingPost,
-			(newVal) => {
-				editingPost.value = newVal
-			}
-		)
+const props = defineProps<Props>()
 
-		const handleSubmit = () => {
-			if (!editingPost.value) return
+// emits を定義
+const emit = defineEmits<{
+	update: [postData: UpdatePostRequest]
+	cancel: []
+}>()
 
-			if (!editingPost.value.title || !editingPost.value.body) {
-				alert('タイトルと本文を入力してください')
-				return
-			}
+// 編集中の投稿データ（props を直接使用）
+const editingPost = ref<UpdatePostRequest | null>(props.editingPost)
 
-			emit('update', editingPost.value)
-		}
+// props の変更を監視
+watch(
+	() => props.editingPost,
+	(newVal) => {
+		editingPost.value = newVal
+	}
+)
 
-		const handleCancel = () => {
-			emit('cancel')
-		}
+const handleSubmit = () => {
+	if (!editingPost.value) return
 
-		return {
-			editingPost,
-			handleSubmit,
-			handleCancel,
-		}
-	},
-})
+	if (!editingPost.value.title || !editingPost.value.body) {
+		alert('タイトルと本文を入力してください')
+		return
+	}
+
+	emit('update', editingPost.value)
+}
+
+const handleCancel = () => {
+	emit('cancel')
+}
 </script>
 

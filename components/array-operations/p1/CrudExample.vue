@@ -85,43 +85,27 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+interface Props {
+	newPostTitle: string
+	newPostUserId: number | null
+	updatePostId: number | null
+	updatePostTitle: string
+	deletePostId: number | null
+}
 
-export default defineComponent({
-	name: 'CrudExample',
-	props: {
-		newPostTitle: {
-			type: String,
-			default: '',
-		},
-		newPostUserId: {
-			type: Number as () => number | null,
-			default: null,
-		},
-		updatePostId: {
-			type: Number as () => number | null,
-			default: null,
-		},
-		updatePostTitle: {
-			type: String,
-			default: '',
-		},
-		deletePostId: {
-			type: Number as () => number | null,
-			default: null,
-		},
-	},
-	emits: [
-		'update:newPostTitle',
-		'update:newPostUserId',
-		'update:updatePostId',
-		'update:updatePostTitle',
-		'update:deletePostId',
-		'add',
-		'update',
-		'delete',
-	],
-})
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	'update:newPostTitle': [value: string]
+	'update:newPostUserId': [value: string | number | null]
+	'update:updatePostId': [value: string | number | null]
+	'update:updatePostTitle': [value: string]
+	'update:deletePostId': [value: string | number | null]
+	add: []
+	update: []
+	delete: []
+}>()
 </script>
 

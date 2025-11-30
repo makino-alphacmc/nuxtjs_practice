@@ -72,22 +72,19 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { ErrorHandlingResult } from '~/types/async-await/p1/api'
 
-export default defineComponent({
-	name: 'ErrorResultDisplay',
-	props: {
-		result: {
-			type: Object as () => ErrorHandlingResult | null,
-			default: null,
-		},
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	emits: ['fetch'],
-})
+interface Props {
+	result: ErrorHandlingResult | null
+	loading: boolean
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	fetch: []
+}>()
 </script>

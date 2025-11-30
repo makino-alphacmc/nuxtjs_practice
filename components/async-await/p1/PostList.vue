@@ -85,8 +85,8 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/async-await/p1/api'
 
 interface Props {
@@ -95,21 +95,5 @@ interface Props {
 	postsError: Error | null
 }
 
-export default defineComponent({
-	name: 'PostList',
-	props: {
-		posts: {
-			type: Array as () => Post[] | null,
-			default: null,
-		},
-		postsPending: {
-			type: Boolean,
-			required: true,
-		},
-		postsError: {
-			type: Object as () => Error | null,
-			default: null,
-		},
-	},
-})
+defineProps<Props>()
 </script>

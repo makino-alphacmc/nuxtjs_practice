@@ -37,7 +37,7 @@ nuxtjs_practice/
 **実務で必須の 4 つの概念:**
 
 1. **型定義の明確化** - `types/crud-operations/p1/api.ts` で `any` の使用を減らす
-2. **コンポーネントの分割** - `components/http-signal/p1/PostEditForm.vue` で再利用性・保守性を向上
+2. **コンポーネントの分割** - `components/http-signal/p1/PostEditForm.vue` で再利用性・保守性を向上（props で受け取る）
 3. **ロジックの分離** - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
@@ -395,7 +395,12 @@ import type { UpdatePostRequest, Post } from '~/types/crud-operations/p1/api'
 </script>
 ```
 
-### 4. 明示的なインポート（トラブル回避）
+### 4. 明示的なインポート（依存明確化）
+
+**目的:**
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
 
 Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/crud-operations/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
 
@@ -413,6 +418,10 @@ import PostEditForm from '~/components/http-signal/p1/PostEditForm.vue'
 // 型定義を明示的にインポート
 import type { UpdatePostRequest, Post } from '~/types/crud-operations/p1/api'
 ```
+
+**注意:**
+- Nuxt 組込（$fetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
 
 **明示的なインポートのメリット：**
 
@@ -481,7 +490,7 @@ const selectPostForEdit = (post: Post) => {
 
 このセクションでは、実務で必須の 4 つの概念を実装しました：
 
-### 1. 型定義の明確化
+### 1. 型定義の明確化（types/）
 
 ```typescript
 // types/crud-operations/p1/api.ts
@@ -495,11 +504,28 @@ export interface UpdatePostRequest {
 
 **メリット：**
 
-- `any` の使用を減らし、実行時エラーを防ぐ
-- IDE の補完機能が働く
-- チーム開発でデータ構造が明確になる
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（Composables）
+### 2. コンポーネント分割（UI の単一責任）
+
+```vue
+<!-- components/http-signal/p1/PostEditForm.vue -->
+<template>
+	<UCard>
+		<!-- 投稿更新フォーム（props で受け取る） -->
+	</UCard>
+</template>
+```
+
+**メリット：**
+
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
+
+### 3. ロジックの分離（composables/）
 
 ```typescript
 // composables/crud-operations/p1/useCrudWithArrayOperations.ts
@@ -519,39 +545,28 @@ const updatePost = async (postData: UpdatePostRequest) => {
 
 **メリット：**
 
-- コードの重複を防ぐ
-- ロジックのテストが容易になる
-- 変更が一箇所で済む
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
 
-### 3. コンポーネントの分割
-
-```vue
-<!-- components/http-signal/p1/PostEditForm.vue -->
-<template>
-	<UCard>
-		<!-- 投稿更新フォーム -->
-	</UCard>
-</template>
-```
-
-**メリット：**
-
-- ファイルが肥大化するのを防ぐ
-- 再利用性が向上する
-- 保守性が向上する
-
-### 4. 明示的なインポート
+### 4. 明示的なインポート（依存明確化）
 
 ```typescript
-// pages/crud-operations/p1/index.vue
+// Composables
 import { useCrudWithArrayOperations } from '~/composables/crud-operations/p1/useCrudWithArrayOperations'
+
+// Components
 import PostEditForm from '~/components/http-signal/p1/PostEditForm.vue'
+
+// Types
+import type { UpdatePostRequest, Post } from '~/types/crud-operations/p1/api'
 ```
 
 **メリット：**
 
-- 自動インポートが機能しない場合でも確実に動作する
-- 依存関係が明確で、リファクタリングが安全
+- ✅ 自動インポートが機能しない場合でも確実に動作する
+- ✅ どこから来ているかが明確で、コードレビューがしやすい
+- ✅ 依存関係が明確で、リファクタリングが安全
 
 ## 配列操作との統合
 
@@ -572,12 +587,13 @@ PUT リクエストを使うことで、以下のメリットが得られます�
 3. **配列操作との統合**: 更新したデータを一覧に自動的に反映できる
 4. **再利用性**: Composables とコンポーネントの分割により、コードの再利用性が向上する
 
-### 実装の流れ
+### 実装の流れ（統一パターン）
 
 1. **型定義を作成**: `types/crud-operations/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/crud-operations/p1/useCrudWithArrayOperations.ts` でロジックを分離
-3. **コンポーネントを作成**: `components/http-signal/p1/PostEditForm.vue` で UI を分割
-4. **メインコンポーネントで統合**: `pages/crud-operations/p1/index.vue` で全てを組み合わせる
+3. **コンポーネントを作成**: `components/http-signal/p1/PostEditForm.vue` で UI を分割（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合**: `pages/crud-operations/p1/index.vue` で全てを組み合わせる
 
-このセクションでは、PUT リクエストの基本的な使い方と、実務で必須の 4 つの概念（型定義・Composables・コンポーネント分割・明示的なインポート）を学びました。次のセクションでは、DELETE リクエストを使った投稿の削除方法を学びます。
+このセクションでは、PUT リクエストの基本的な使い方と、実務で必須の 4 つの概念（型定義・コンポーネント分割・ロジックの分離・明示的なインポート）を学びました。次のセクションでは、DELETE リクエストを使った投稿の削除方法を学びます。
 

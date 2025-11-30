@@ -51,27 +51,22 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/array-operations/p1/api'
 
-export default defineComponent({
-	name: 'FilterExample',
-	props: {
-		filterUserId: {
-			type: Number as () => number | null,
-			default: null,
-		},
-		filteredPosts: {
-			type: Array as () => Post[],
-			required: true,
-		},
-		hasData: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	emits: ['update:filterUserId', 'clearFilter'],
-})
+interface Props {
+	filterUserId: number | null
+	filteredPosts: Post[]
+	hasData: boolean
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	'update:filterUserId': [value: string | null]
+	clearFilter: []
+}>()
 </script>
 

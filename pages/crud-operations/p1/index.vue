@@ -91,7 +91,7 @@ import PostListWithOperations from '~/components/crud-operations/p1/PostListWith
 import PostCreateForm from '~/components/http-signal/p1/PostCreateForm.vue'
 import PostEditForm from '~/components/http-signal/p1/PostEditForm.vue'
 
-// 型定義を明示的にインポート
+// 型定義を明示的にインポート（必要に応じて使用）
 import type {
 	Post,
 	CreatePostRequest,

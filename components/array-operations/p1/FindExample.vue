@@ -45,27 +45,22 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/array-operations/p1/api'
 
-export default defineComponent({
-	name: 'FindExample',
-	props: {
-		searchId: {
-			type: Number as () => number | null,
-			default: null,
-		},
-		foundPost: {
-			type: Object as () => Post | null,
-			default: null,
-		},
-		hasData: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	emits: ['update:searchId', 'clearSearch'],
-})
+interface Props {
+	searchId: number | null
+	foundPost: Post | null
+	hasData: boolean
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	'update:searchId': [value: string | null]
+	clearSearch: []
+}>()
 </script>
 

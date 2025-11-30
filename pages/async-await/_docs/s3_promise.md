@@ -33,11 +33,12 @@ nuxtjs_practice/
             └── index.vue             # メインコンポーネント
 ```
 
-**実務で必須の 3 つの概念:**
+**実務で必須の 4 つの概念:**
 
 1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
-2. **コンポーネントの分割** - `components/async-await/p1/ParallelDataCards.vue` で再利用性・保守性を向上
+2. **コンポーネントの分割** - `components/async-await/p1/ParallelDataCards.vue` で再利用性・保守性を向上（props で受け取る）
 3. **ロジックの分離** - `composables/async-await/p1/useParallelData.ts` で composables を活用
+4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
 ## Promise.all とは、なぜ必要なのか？
 
@@ -97,11 +98,12 @@ const [posts, users] = await Promise.all([
 
 ## 実装手順
 
-実務で必須の 3 つの概念を順番に実装していきます：
+実務で必須の 4 つの概念を順番に実装していきます：
 
 1. **型定義の明確化** - `any` の使用を減らす
 2. **ロジックの分離** - composables の活用
-3. **コンポーネントの分割** - 再利用性・保守性向上
+3. **コンポーネントの分割** - 再利用性・保守性向上（props で受け取る）
+4. **明示的なインポート** - トラブル回避のため
 
 ### 1. 型定義の作成（必須）
 
@@ -224,8 +226,11 @@ export const useParallelData = () => {
 ```typescript
 // pages/async-await/p1/index.vue
 <script setup lang="ts">
-	// composable を使うことで、ロジックが再利用可能になる
-	const { loading, data, error, fetchMultipleData } = useParallelData()
+// Composables を明示的にインポート
+import { useParallelData } from '~/composables/async-await/p1/useParallelData'
+
+// composable を使うことで、ロジックが再利用可能になる
+const { loading, data, error, fetchMultipleData } = useParallelData()
 </script>
 ```
 
@@ -261,10 +266,49 @@ export const useParallelData = () => {
 </template>
 
 <script setup lang="ts">
-	// composable からデータを取得
-	const { loading, data, error, fetchMultipleData } = useParallelData()
+// Composables を明示的にインポート
+import { useParallelData } from '~/composables/async-await/p1/useParallelData'
+
+// Components を明示的にインポート
+import ParallelDataCards from '~/components/async-await/p1/ParallelDataCards.vue'
+
+// composable からデータを取得
+const { loading, data, error, fetchMultipleData } = useParallelData()
 </script>
 ```
+
+### 4. 明示的なインポート（依存明確化）
+
+**目的:**
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
+
+Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/async-await/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
+
+```typescript
+// pages/async-await/p1/index.vue
+<script setup lang="ts">
+// Composables を明示的にインポート
+import { useParallelData } from '~/composables/async-await/p1/useParallelData'
+
+// Components を明示的にインポート
+import ParallelDataCards from '~/components/async-await/p1/ParallelDataCards.vue'
+
+// 型定義を明示的にインポート
+import type { ParallelData } from '~/types/async-await/p1/api'
+</script>
+```
+
+**注意:**
+- Nuxt 組込（useFetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
+
+**明示的なインポートのメリット：**
+
+- ✅ **確実性**: 自動インポートが機能しない場合でも確実に動作する
+- ✅ **可読性**: どこから来ているかが明確で、コードレビューがしやすい
+- ✅ **保守性**: 依存関係が明確で、リファクタリングが安全
 
 ### 4. Template 部分の実装
 
@@ -397,9 +441,9 @@ defineProps<Props>()
 
 ## 実装の全体像
 
-このセクションでは、実務で必須の 3 つの概念を実装しました：
+このセクションでは、実務で必須の 4 つの概念を実装しました：
 
-### 1. 型定義の明確化
+### 1. 型定義の明確化（types/）
 
 ```typescript
 // types/async-await/p1/api.ts
@@ -413,11 +457,28 @@ export interface ParallelData {
 
 **メリット：**
 
-- `any` の使用を減らし、実行時エラーを防ぐ
-- IDE の補完機能が働く
-- チーム開発でデータ構造が明確になる
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（Composables）
+### 2. コンポーネント分割（UI の単一責任）
+
+```vue
+<!-- components/async-await/p1/ParallelDataCards.vue -->
+<template>
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<!-- 並列取得結果のカード表示（props で受け取る） -->
+	</div>
+</template>
+```
+
+**メリット：**
+
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
+
+### 3. ロジックの分離（composables/）
 
 ```typescript
 // composables/async-await/p1/useParallelData.ts
@@ -429,26 +490,28 @@ export const useParallelData = () => {
 
 **メリット：**
 
-- コードの重複を防ぐ
-- ロジックのテストが容易になる
-- 変更が一箇所で済む
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
 
-### 3. コンポーネントの分割
+### 4. 明示的なインポート（依存明確化）
 
-```vue
-<!-- components/async-await/p1/ParallelDataCards.vue -->
-<template>
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-		<!-- 並列取得結果のカード表示 -->
-	</div>
-</template>
+```typescript
+// Composables
+import { useParallelData } from '~/composables/async-await/p1/useParallelData'
+
+// Components
+import ParallelDataCards from '~/components/async-await/p1/ParallelDataCards.vue'
+
+// Types
+import type { ParallelData } from '~/types/async-await/p1/api'
 ```
 
 **メリット：**
 
-- ファイルが肥大化するのを防ぐ
-- 再利用性が向上する
-- 保守性が向上する
+- ✅ 自動インポートが機能しない場合でも確実に動作する
+- ✅ どこから来ているかが明確で、コードレビューがしやすい
+- ✅ 依存関係が明確で、リファクタリングが安全
 
 ## まとめ
 
@@ -459,11 +522,12 @@ export const useParallelData = () => {
 3. **エラー検知の容易さ**: どれかが失敗した時点で一括で `catch` に飛ばせる
 4. **保守性の向上**: 型定義と Composables を活用することで、複数の API を扱うコードも安全に管理できる
 
-### 実装の流れ
+### 実装の流れ（統一パターン）
 
 1. **型定義を作成**: `types/async-await/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/async-await/p1/useParallelData.ts` でロジックを分離
-3. **コンポーネントを作成**: `components/async-await/p1/ParallelDataCards.vue` で UI を分割
-4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
+3. **コンポーネントを作成**: `components/async-await/p1/ParallelDataCards.vue` で UI を分割（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
 
-このセクションでは、`Promise.all`を使った並列処理の実装方法と、実務で必須の 3 つの概念（型定義・Composables・コンポーネント分割）を学びました。次のセクションでは、順次処理（await の連続）を学びます。
+このセクションでは、`Promise.all`を使った並列処理の実装方法と、実務で必須の 4 つの概念（型定義・コンポーネント分割・ロジックの分離・明示的なインポート）を学びました。次のセクションでは、順次処理（await の連続）を学びます。

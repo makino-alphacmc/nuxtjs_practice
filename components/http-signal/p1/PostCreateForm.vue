@@ -39,45 +39,40 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import type { CreatePostRequest } from '~/types/http-signal/p1/api'
+<script setup lang="ts">
+// 型定義を明示的にインポート
+import type { CreatePostRequest } from '~/types/crud-operations/p1/api'
 
-export default defineComponent({
-	name: 'PostCreateForm',
-	props: {
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	emits: ['create'],
-	setup(props, { emit }) {
-		const formData = ref<CreatePostRequest>({
-			title: '',
-			body: '',
-			userId: 1,
-		})
+interface Props {
+	loading: boolean
+}
 
-		const handleSubmit = () => {
-			if (!formData.value.title || !formData.value.body) {
-				alert('タイトルと本文を入力してください')
-				return
-			}
-			emit('create', formData.value)
-			// フォームをリセット
-			formData.value = {
-				title: '',
-				body: '',
-				userId: 1,
-			}
-		}
+defineProps<Props>()
 
-		return {
-			formData,
-			handleSubmit,
-		}
-	},
+// emits を定義
+const emit = defineEmits<{
+	create: [postData: CreatePostRequest]
+}>()
+
+// フォームデータ
+const formData = ref<CreatePostRequest>({
+	title: '',
+	body: '',
+	userId: 1,
 })
+
+const handleSubmit = () => {
+	if (!formData.value.title || !formData.value.body) {
+		alert('タイトルと本文を入力してください')
+		return
+	}
+	emit('create', formData.value)
+	// フォームをリセット
+	formData.value = {
+		title: '',
+		body: '',
+		userId: 1,
+	}
+}
 </script>
 

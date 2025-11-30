@@ -93,8 +93,8 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { User } from '~/types/async-await/p1/api'
 
 interface Props {
@@ -103,22 +103,10 @@ interface Props {
 	error: string | null
 }
 
-export default defineComponent({
-	name: 'UserInfo',
-	props: {
-		user: {
-			type: Object as () => User | null,
-			default: null,
-		},
-		loading: {
-			type: Boolean,
-			required: true,
-		},
-		error: {
-			type: String as () => string | null,
-			default: null,
-		},
-	},
-	emits: ['fetch'],
-})
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	fetch: []
+}>()
 </script>

@@ -58,27 +58,23 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+// 型定義を明示的にインポート
 import type { Post } from '~/types/array-operations/p1/api'
 
-export default defineComponent({
-	name: 'SortExample',
-	props: {
-		sortBy: {
-			type: String as () => 'id' | 'title' | 'userId',
-			required: true,
-		},
-		sortOrder: {
-			type: String as () => 'asc' | 'desc',
-			required: true,
-		},
-		sortedPosts: {
-			type: Array as () => Post[],
-			required: true,
-		},
-	},
-	emits: ['update:sortBy', 'toggleSortOrder'],
-})
+interface Props {
+	sortBy: 'id' | 'title' | 'userId'
+	sortOrder: 'asc' | 'desc'
+	sortedPosts: Post[]
+}
+
+defineProps<Props>()
+
+// emits を定義
+defineEmits<{
+	'update:sortBy': [value: 'id' | 'title' | 'userId']
+	'update:sortOrder': [value: 'asc' | 'desc']
+	toggleSortOrder: []
+}>()
 </script>
 

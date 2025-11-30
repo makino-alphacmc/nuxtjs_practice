@@ -1,4 +1,4 @@
-# セクション 4: find - 特定のデータを検索
+# セクション 2: filter - データの絞り込み
 
 > **このセクションでは [JSONPlaceholder](https://jsonplaceholder.typicode.com/) を使用します**  
 > JSONPlaceholder は、テストやプロトタイプ用の無料のフェイク REST API です。ユーザー情報、投稿、コメントなどのサンプルデータを提供しており、実際のバックエンドサーバーなしでフロントエンドの開発や学習が可能です。
@@ -16,19 +16,19 @@ nuxtjs_practice/
 ├── composables/                      # Composables（必須）
 │   └── array-operations/
 │       └── p1/
-│           └── useArrayOperations.ts # findPostById() メソッド
+│           └── useArrayOperations.ts # getFilteredPosts() メソッド
 ├── components/                       # コンポーネント（必須）
 │   └── array-operations/
 │       └── p1/
-│           └── FindExample.vue       # find操作のコンポーネント
+│           └── FilterExample.vue     # filter操作のコンポーネント
 └── pages/
     └── array-operations/
         ├── _docs/                    # マニュアルファイル
         │   ├── README.md             # 全体構成の説明
         │   ├── s1_map.md            # map の詳細解説
-        │   ├── s2_filter.md         # filter の詳細解説
+        │   ├── s2_filter.md         # このファイル
         │   ├── s3_reduce.md         # reduce の詳細解説
-        │   ├── s4_find.md           # このファイル
+        │   ├── s4_find.md           # find の詳細解説
         │   ├── s5_sort.md           # ソート の詳細解説
         │   ├── s6_pagination.md     # ページネーション の詳細解説
         │   └── s7_crud.md           # CRUD操作 の詳細解説
@@ -39,64 +39,64 @@ nuxtjs_practice/
 **実務で必須の 4 つの概念:**
 
 1. **型定義の明確化** - `types/array-operations/p1/api.ts` で `any` の使用を減らす
-2. **コンポーネントの分割** - `components/array-operations/p1/FindExample.vue` で再利用性・保守性を向上
+2. **コンポーネントの分割** - `components/array-operations/p1/FilterExample.vue` で再利用性・保守性を向上（props で受け取る）
 3. **ロジックの分離** - `composables/array-operations/p1/useArrayOperations.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
-## find とは、なぜ必要なのか？
+## filter とは、なぜ必要なのか？
 
-### find とは
+### filter とは
 
-`find`は、配列の各要素に対して条件をチェックし、**条件に合致する最初の要素を返す**メソッドです。条件に合致する要素が見つからない場合は`undefined`を返します。
+`filter`は、配列の各要素に対して条件をチェックし、**条件に合致する要素だけを抽出**して新しい配列を生成するメソッドです。元の配列を変更せず、条件に合致する要素のみを含む新しい配列を返します。
 
 ### なぜ必要なのか？
 
-Web アプリケーションでは、以下のような場面で特定のデータの検索が必要です：
+Web アプリケーションでは、以下のような場面でデータの絞り込みが必要です：
 
-1. **詳細表示** - IDで特定の投稿を検索して詳細を表示
-2. **存在確認** - 特定の条件に合致するデータが存在するか確認
-3. **データの取得** - 条件に合致する最初の要素を取得
+1. **検索機能** - キーワードで検索、条件でフィルタリング
+2. **カテゴリ別表示** - カテゴリで絞り込み、タグでフィルタリング
+3. **ステータス別表示** - 完了/未完了、公開/非公開などでフィルタリング
 
-これらを実装するために、`find`を使ったデータの検索方法を理解する必要があります。
+これらを実装するために、`filter`を使ったデータの絞り込み方法を理解する必要があります。
 
 ### 主な特徴
 
-- **最初の要素のみ返す**: 条件に合致する最初の要素を返す（複数ある場合は最初の1つ）
-- **undefined を返す可能性**: 条件に合致する要素がない場合は`undefined`を返す
-- **元の配列を変更しない**: 新しい配列を生成せず、要素を返すだけ
-- **早期終了**: 条件に合致する要素を見つけたら処理を終了
-
-### filter との違い
-
-- **find**: 条件に合致する**最初の要素**を返す（要素または undefined）
-- **filter**: 条件に合致する**全ての要素**を返す（配列）
+- **元の配列を変更しない**: 新しい配列を生成する（イミュータブル）
+- **条件に合致する要素のみ抽出**: 条件関数が`true`を返す要素のみを含む
+- **新しい配列を返す**: フィルタリング結果を新しい配列として返す
+- **関数型プログラミング**: 副作用がない純粋関数として使用できる
 
 ## 一般的な使用例
 
 ### 基本的な使い方
 
 ```typescript
-// IDで特定の要素を検索
-const post = posts.find((post) => post.id === 1)
-// 結果: Post オブジェクトまたは undefined
+// 偶数のみを抽出
+const numbers = [1, 2, 3, 4, 5, 6]
+const evens = numbers.filter((n) => n % 2 === 0)
+// 結果: [2, 4, 6]
 ```
 
 ### よくある使用パターン
 
-1. **IDで検索**
+1. **条件でフィルタリング**
 
    ```typescript
-   const post = posts.find((post) => post.id === searchId)
+   const filtered = posts.filter((post) => post.userId === 1)
    ```
 
-2. **条件で検索**
+2. **複数条件でフィルタリング**
    ```typescript
-   const activeUser = users.find((user) => user.status === 'active')
+   const filtered = posts.filter((post) => {
+   	return post.userId === 1 && post.title.length > 10
+   })
    ```
 
-3. **存在確認**
+3. **検索機能**
    ```typescript
-   const exists = posts.find((post) => post.id === id) !== undefined
+   const filtered = posts.filter((post) => 
+   	post.title.toLowerCase().includes(searchTerm.toLowerCase())
+   )
    ```
 
 ## 実装手順
@@ -129,14 +129,14 @@ export interface Post {
 ```typescript
 import type { Post } from '~/types/array-operations/p1/api'
 
-// find の戻り値は Post | undefined 型になる
-const post: Post | undefined = posts.find((post: Post) => post.id === searchId)
+// filter の戻り値も Post[] 型になる
+const filtered: Post[] = posts.filter((post: Post) => post.userId === 1)
 ```
 
 **型定義のメリット：**
 
-- IDE が自動補完してくれる（`post.title` など）
-- `undefined`チェックを忘れないようにできる
+- IDE が自動補完してくれる（`post.userId` など）
+- タイポをコンパイル時に検出できる
 - チーム開発でデータ構造が明確になる
 
 ### 2. ロジックの分離（Composables の活用）
@@ -152,17 +152,17 @@ import type { Post } from '~/types/array-operations/p1/api'
 export const useArrayOperations = () => {
 	const posts = useState<Post[]>('array-operations-posts', () => [])
 
-	// 4. find - 特定のデータを検索
-	const findPostById = (id: number | null) => {
-		if (id === null) {
-			return null
+	// 2. filter - データの絞り込み
+	const getFilteredPosts = (userId: number | null) => {
+		if (userId === null) {
+			return posts.value
 		}
-		return posts.value.find((post) => post.id === id) || null
+		return posts.value.filter((post) => post.userId === userId)
 	}
 
 	return {
 		posts: readonly(posts),
-		findPostById,
+		getFilteredPosts,
 	}
 }
 ```
@@ -176,9 +176,9 @@ export const useArrayOperations = () => {
 
 **コードの説明：**
 
-- `find`: 条件に合致する最初の要素を返す
-- `id === null`: 検索IDがない場合は`null`を返す
-- `|| null`: `undefined`の代わりに`null`を返す（UIでの扱いが簡単）
+- `filter`: 条件に合致する要素のみを抽出
+- `userId === null`: フィルタ条件がない場合は全件を返す
+- `post.userId === userId`: ユーザーIDが一致する投稿のみを抽出
 
 #### 2-2. コンポーネントでの使用
 
@@ -188,11 +188,11 @@ export const useArrayOperations = () => {
 // Composables を明示的にインポート
 import { useArrayOperations } from '~/composables/array-operations/p1/useArrayOperations'
 
-const { findPostById } = useArrayOperations()
+const { getFilteredPosts } = useArrayOperations()
 
-const searchId = ref<number | null>(null)
-const foundPost = computed(() => {
-	return findPostById(searchId.value)
+const filterUserId = ref<number | null>(null)
+const filteredPosts = computed(() => {
+	return getFilteredPosts(filterUserId.value)
 })
 </script>
 ```
@@ -201,52 +201,36 @@ const foundPost = computed(() => {
 
 大きなコンポーネントを**小さなコンポーネントに分割**することで、保守性と再利用性が向上します。
 
-#### 3-1. components/FindExample.vue の作成
+#### 3-1. components/FilterExample.vue の作成
 
 ```vue
-<!-- components/array-operations/p1/FindExample.vue -->
+<!-- components/array-operations/p1/FilterExample.vue -->
 <template>
 	<UCard class="bg-neutral-950">
 		<template #header>
 			<h2 class="text-xl font-semibold text-neutral-100">
-				4. find - 特定のデータを検索
+				2. filter - データの絞り込み
 			</h2>
 		</template>
 		<div class="space-y-4">
 			<div class="flex items-center gap-4">
 				<UInput
-					:model-value="searchId"
-					@update:model-value="$emit('update:searchId', $event)"
+					:model-value="filterUserId"
+					@update:model-value="$emit('update:filterUserId', $event)"
 					type="number"
-					placeholder="投稿ID"
-					label="IDで検索"
+					placeholder="ユーザーID（1-10）"
+					label="ユーザーIDでフィルタ"
 					class="w-48"
 				/>
 				<UButton
-					@click="$emit('clearSearch')"
+					@click="$emit('clearFilter')"
 					color="gray"
 					variant="outline"
 				>
 					クリア
 				</UButton>
 			</div>
-			<div v-if="foundPost" class="p-4 bg-neutral-900 rounded-lg">
-				<p class="text-sm text-neutral-300 mb-2">
-					<strong class="text-neutral-100">ID:</strong> {{ foundPost.id }}
-				</p>
-				<p class="text-sm text-neutral-300 mb-2">
-					<strong class="text-neutral-100">タイトル:</strong> {{ foundPost.title }}
-				</p>
-				<p class="text-sm text-neutral-300">
-					<strong class="text-neutral-100">ユーザーID:</strong> {{ foundPost.userId }}
-				</p>
-			</div>
-			<div v-else-if="hasData && searchId" class="text-sm text-neutral-500">
-				該当するデータがありません
-			</div>
-			<div v-else-if="!hasData" class="text-sm text-neutral-500">
-				データを取得してください
-			</div>
+			<!-- フィルタ結果の表示 -->
 		</div>
 	</UCard>
 </template>
@@ -256,22 +240,22 @@ import { defineComponent } from 'vue'
 import type { Post } from '~/types/array-operations/p1/api'
 
 export default defineComponent({
-	name: 'FindExample',
+	name: 'FilterExample',
 	props: {
-		searchId: {
+		filterUserId: {
 			type: Number as () => number | null,
 			default: null,
 		},
-		foundPost: {
-			type: Object as () => Post | null,
-			default: null,
+		filteredPosts: {
+			type: Array as () => Post[],
+			required: true,
 		},
 		hasData: {
 			type: Boolean,
 			required: true,
 		},
 	},
-	emits: ['update:searchId', 'clearSearch'],
+	emits: ['update:filterUserId', 'clearFilter'],
 })
 </script>
 ```
@@ -288,11 +272,11 @@ export default defineComponent({
 <!-- pages/array-operations/p1/index.vue -->
 <template>
 	<div>
-		<FindExample
-			v-model:search-id="searchId"
-			:found-post="foundPost"
+		<FilterExample
+			v-model:filter-user-id="filterUserId"
+			:filtered-posts="filteredPosts"
 			:has-data="posts.length > 0"
-			@clear-search="searchId = null"
+			@clear-filter="filterUserId = null"
 		/>
 	</div>
 </template>
@@ -302,11 +286,16 @@ export default defineComponent({
 import { useArrayOperations } from '~/composables/array-operations/p1/useArrayOperations'
 
 // Components を明示的にインポート
-import FindExample from '~/components/array-operations/p1/FindExample.vue'
+import FilterExample from '~/components/array-operations/p1/FilterExample.vue'
 </script>
 ```
 
-### 4. 明示的なインポート（トラブル回避）
+### 4. 明示的なインポート（依存明確化）
+
+**目的:**
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
 
 Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/array-operations/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
 
@@ -319,11 +308,15 @@ Nuxt 3 では自動インポート機能がありますが、深い階層（`com
 import { useArrayOperations } from '~/composables/array-operations/p1/useArrayOperations'
 
 // Components を明示的にインポート
-import FindExample from '~/components/array-operations/p1/FindExample.vue'
+import FilterExample from '~/components/array-operations/p1/FilterExample.vue'
 
 // 型定義を明示的にインポート
 import type { Post } from '~/types/array-operations/p1/api'
 ```
+
+**注意:**
+- Nuxt 組込（$fetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
 
 **明示的なインポートのメリット：**
 
@@ -333,20 +326,20 @@ import type { Post } from '~/types/array-operations/p1/api'
 
 ### 5. Template 部分の実装
 
-#### 5-1. 検索入力
+#### 5-1. フィルタ入力
 
 ```vue
 <div class="flex items-center gap-4">
 	<UInput
-		:model-value="searchId"
-		@update:model-value="$emit('update:searchId', $event)"
+		:model-value="filterUserId"
+		@update:model-value="$emit('update:filterUserId', $event)"
 		type="number"
-		placeholder="投稿ID"
-		label="IDで検索"
+		placeholder="ユーザーID（1-10）"
+		label="ユーザーIDでフィルタ"
 		class="w-48"
 	/>
 	<UButton
-		@click="$emit('clearSearch')"
+		@click="$emit('clearFilter')"
 		color="gray"
 		variant="outline"
 	>
@@ -357,37 +350,43 @@ import type { Post } from '~/types/array-operations/p1/api'
 
 **コードの説明：**
 
+- `v-model`の代わりに`:model-value`と`@update:model-value`を使用（親子間の双方向バインディング）
 - `type="number"`: 数値入力フィールド
-- `@update:model-value`: 親子間の双方向バインディング
-- `@click="$emit('clearSearch')"`: クリアボタンクリック時に親コンポーネントにイベントを発行
+- `@click="$emit('clearFilter')"`: クリアボタンクリック時に親コンポーネントにイベントを発行
 
-#### 5-2. 検索結果の表示
+#### 5-2. フィルタ結果の表示
 
 ```vue
-<div v-if="foundPost" class="p-4 bg-neutral-900 rounded-lg">
-	<p class="text-sm text-neutral-300 mb-2">
-		<strong class="text-neutral-100">ID:</strong> {{ foundPost.id }}
+<div v-if="filteredPosts.length > 0" class="space-y-2">
+	<p class="text-sm text-neutral-400">
+		フィルタ結果: {{ filteredPosts.length }}件
 	</p>
-	<p class="text-sm text-neutral-300 mb-2">
-		<strong class="text-neutral-100">タイトル:</strong> {{ foundPost.title }}
-	</p>
-	<p class="text-sm text-neutral-300">
-		<strong class="text-neutral-100">ユーザーID:</strong> {{ foundPost.userId }}
+	<div
+		v-for="post in filteredPosts.slice(0, 5)"
+		:key="post.id"
+		class="p-3 bg-neutral-900 rounded-lg"
+	>
+		<p class="text-sm text-neutral-200">
+			ID {{ post.id }}: {{ post.title }}
+		</p>
+	</div>
+	<p v-if="filteredPosts.length > 5" class="text-xs text-neutral-500">
+		他 {{ filteredPosts.length - 5 }}件...
 	</p>
 </div>
 ```
 
 **コードの説明：**
 
-- `v-if="foundPost"`: 検索結果が存在する場合のみ表示
-- `{{ foundPost.id }}`: 検索結果のIDを表示
-- `v-else-if`: 検索結果がない場合のメッセージを表示
+- `v-if="filteredPosts.length > 0"`: フィルタ結果が存在する場合のみ表示
+- `filteredPosts.slice(0, 5)`: 最初の5件のみ表示（表示件数を制限）
+- `{{ filteredPosts.length }}`: フィルタ結果の件数を表示
 
 ## 実装の全体像
 
 このセクションでは、実務で必須の 4 つの概念を実装しました：
 
-### 1. 型定義の明確化
+### 1. 型定義の明確化（types/）
 
 ```typescript
 // types/array-operations/p1/api.ts
@@ -401,73 +400,80 @@ export interface Post {
 
 **メリット：**
 
-- `any` の使用を減らし、実行時エラーを防ぐ
-- IDE の補完機能が働く
-- チーム開発でデータ構造が明確になる
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（Composables）
-
-```typescript
-// composables/array-operations/p1/useArrayOperations.ts
-const findPostById = (id: number | null) => {
-	if (id === null) {
-		return null
-	}
-	return posts.value.find((post) => post.id === id) || null
-}
-```
-
-**メリット：**
-
-- コードの重複を防ぐ
-- ロジックのテストが容易になる
-- 変更が一箇所で済む
-
-### 3. コンポーネントの分割
+### 2. コンポーネント分割（UI の単一責任）
 
 ```vue
-<!-- components/array-operations/p1/FindExample.vue -->
+<!-- components/array-operations/p1/FilterExample.vue -->
 <template>
 	<UCard>
-		<!-- find操作のUI -->
+		<!-- filter操作のUI（props で受け取る） -->
 	</UCard>
 </template>
 ```
 
 **メリット：**
 
-- ファイルが肥大化するのを防ぐ
-- 再利用性が向上する
-- 保守性が向上する
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
 
-### 4. 明示的なインポート
+### 3. ロジックの分離（composables/）
 
 ```typescript
-// pages/array-operations/p1/index.vue
-import { useArrayOperations } from '~/composables/array-operations/p1/useArrayOperations'
-import FindExample from '~/components/array-operations/p1/FindExample.vue'
+// composables/array-operations/p1/useArrayOperations.ts
+const getFilteredPosts = (userId: number | null) => {
+	if (userId === null) {
+		return posts.value
+	}
+	return posts.value.filter((post) => post.userId === userId)
+}
 ```
 
 **メリット：**
 
-- 自動インポートが機能しない場合でも確実に動作する
-- 依存関係が明確で、リファクタリングが安全
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
+
+### 4. 明示的なインポート（依存明確化）
+
+```typescript
+// Composables
+import { useArrayOperations } from '~/composables/array-operations/p1/useArrayOperations'
+
+// Components
+import FilterExample from '~/components/array-operations/p1/FilterExample.vue'
+
+// Types
+import type { Post } from '~/types/array-operations/p1/api'
+```
+
+**メリット：**
+
+- ✅ 自動インポートが機能しない場合でも確実に動作する
+- ✅ どこから来ているかが明確で、コードレビューがしやすい
+- ✅ 依存関係が明確で、リファクタリングが安全
 
 ## まとめ
 
-`find`を使うことで、以下のメリットが得られます：
+`filter`を使うことで、以下のメリットが得られます：
 
-1. **特定のデータの検索**: 条件に合致する最初の要素を取得できる
-2. **詳細表示**: IDで特定のデータを検索して詳細を表示できる
-3. **存在確認**: 特定の条件に合致するデータが存在するか確認できる
+1. **データの絞り込み**: 条件に合致する要素のみを抽出できる
+2. **イミュータブル**: 元の配列を変更せず、安全にデータを操作できる
+3. **検索・フィルタ機能**: ユーザーが条件を指定してデータを絞り込める
 4. **再利用性**: Composables とコンポーネントの分割により、コードの再利用性が向上する
 
-### 実装の流れ
+### 実装の流れ（統一パターン）
 
 1. **型定義を作成**: `types/array-operations/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/array-operations/p1/useArrayOperations.ts` でロジックを分離
-3. **コンポーネントを作成**: `components/array-operations/p1/FindExample.vue` で UI を分割
-4. **メインコンポーネントで統合**: `pages/array-operations/p1/index.vue` で全てを組み合わせる
+3. **コンポーネントを作成**: `components/array-operations/p1/FilterExample.vue` で UI を分割（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合**: `pages/array-operations/p1/index.vue` で全てを組み合わせる
 
-このセクションでは、`find`の基本的な使い方と、実務で必須の 4 つの概念（型定義・Composables・コンポーネント分割・明示的なインポート）を学びました。次のセクションでは、ソートを使ったデータの並び替え方法を学びます。
+このセクションでは、`filter`の基本的な使い方と、実務で必須の 4 つの概念（型定義・コンポーネント分割・ロジックの分離・明示的なインポート）を学びました。次のセクションでは、`reduce`を使ったデータの集計方法を学びます。
 

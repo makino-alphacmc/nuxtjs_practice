@@ -34,7 +34,7 @@ nuxtjs_practice/
 **実務で必須の 4 つの概念:**
 
 1. **型定義の明確化** - `types/async-await/p1/api.ts` で `any` の使用を減らす
-2. **コンポーネントの分割** - `components/async-await/p1/UserInfo.vue` で再利用性・保守性を向上
+2. **コンポーネントの分割** - `components/async-await/p1/UserInfo.vue` で再利用性・保守性を向上（props で受け取る）
 3. **ロジックの分離** - `composables/async-await/p1/useUser.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
@@ -271,7 +271,12 @@ const { loading, user, error, fetchUser } = useUser(1)
 </script>
 ```
 
-### 4. 明示的なインポート（トラブル回避）
+### 4. 明示的なインポート（依存明確化）
+
+**目的:**
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
 
 Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/async-await/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
 
@@ -294,6 +299,10 @@ import type { User } from '~/types/async-await/p1/api'
 const { loading, user, error, fetchUser } = useUser(1)
 </script>
 ```
+
+**注意:**
+- Nuxt 組込（useFetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
 
 **明示的なインポートのメリット：**
 
@@ -413,7 +422,7 @@ const { loading, user, error, fetchUser } = useUser(1)
 
 このセクションでは、実務で必須の 4 つの概念を実装しました：
 
-### 1. 型定義の明確化
+### 1. 型定義の明確化（types/）
 
 ```typescript
 // types/async-await/p1/api.ts
@@ -427,11 +436,28 @@ export interface User {
 
 **メリット：**
 
-- `any` の使用を減らし、実行時エラーを防ぐ
-- IDE の補完機能が働く
-- チーム開発でデータ構造が明確になる
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（Composables）
+### 2. コンポーネント分割（UI の単一責任）
+
+```vue
+<!-- components/async-await/p1/UserInfo.vue -->
+<template>
+	<UCard>
+		<!-- ユーザー情報のUI（props で受け取る） -->
+	</UCard>
+</template>
+```
+
+**メリット：**
+
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
+
+### 3. ロジックの分離（composables/）
 
 ```typescript
 // composables/async-await/p1/useUser.ts
@@ -443,41 +469,44 @@ export const useUser = () => {
 
 **メリット：**
 
-- コードの重複を防ぐ
-- ロジックのテストが容易になる
-- 変更が一箇所で済む
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
 
-### 3. コンポーネントの分割
+### 4. 明示的なインポート（依存明確化）
 
-```vue
-<!-- components/async-await/p1/UserInfo.vue -->
-<template>
-	<UCard>
-		<!-- ユーザー情報のUI -->
-	</UCard>
-</template>
+```typescript
+// Composables
+import { useUser } from '~/composables/async-await/p1/useUser'
+
+// Components
+import UserInfo from '~/components/async-await/p1/UserInfo.vue'
+
+// Types
+import type { User } from '~/types/async-await/p1/api'
 ```
 
 **メリット：**
 
-- ファイルが肥大化するのを防ぐ
-- 再利用性が向上する
-- 保守性が向上する
+- ✅ 自動インポートが機能しない場合でも確実に動作する
+- ✅ どこから来ているかが明確で、コードレビューがしやすい
+- ✅ 依存関係が明確で、リファクタリングが安全
 
 ## まとめ
 
 `async/await`と`try/catch`を使うことで、以下のメリットが得られます：
 
 1. **コードがシンプル**: 状態リセット → API 実行 → 例外処理 → 後片付けを 1 つの関数に集約
-2. **制御が細かい**: エラーメッセージの整形やリトライ導線など、細部まで自作できる
+2. **制御が細かい**: エラーメッセージの整形やリトライ導線など、細部まで自作できる（実務で必須）
 3. **保守性の向上**: 型定義と Composables を活用することで、実務レベルのコード品質を実現
 4. **理解が深まる**: この手動フローを理解すると、次の Promise 並列・直列処理（セクション 3 / 4）もスムーズに応用できる
 
-### 実装の流れ
+### 実装の流れ（統一パターン）
 
 1. **型定義を作成**: `types/async-await/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/async-await/p1/useUser.ts` でロジックを分離
-3. **コンポーネントを作成**: `components/async-await/p1/UserInfo.vue` で UI を分割
-4. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
+3. **コンポーネントを作成**: `components/async-await/p1/UserInfo.vue` で UI を分割（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合**: `pages/async-await/p1/index.vue` で全てを組み合わせる
 
-このセクションでは、手動での非同期処理の実装方法と、実務で必須の 4 つの概念（型定義・Composables・コンポーネント分割・明示的なインポート）を学びました。基本を理解したら、応用編（Promise.all、Sequential await、詳細なエラーハンドリング）に進むことができます。
+このセクションでは、手動での非同期処理の実装方法と、実務で必須の 4 つの概念（型定義・コンポーネント分割・ロジックの分離・明示的なインポート）を学びました。基本を理解したら、応用編（Promise.all、Sequential await、詳細なエラーハンドリング）に進むことができます。

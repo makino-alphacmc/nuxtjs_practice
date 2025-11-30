@@ -66,6 +66,9 @@ import ParallelDataCards from '~/components/async-await/p1/ParallelDataCards.vue
 import SequentialSteps from '~/components/async-await/p1/SequentialSteps.vue'
 import ErrorResultDisplay from '~/components/async-await/p1/ErrorResultDisplay.vue'
 
+// 型定義を明示的にインポート（必要に応じて使用）
+// import type { Post, User, ParallelData, SequentialData, ErrorHandlingResult } from '~/types/async-await/p1/api'
+
 // セクション1: useFetch
 const { posts, postsPending, postsError } = usePosts()
 

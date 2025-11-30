@@ -75,9 +75,11 @@
 
 <script setup lang="ts">
 // Composables を明示的にインポート
+// 注: composables/array-operations/p1/ のような深い階層では自動インポートが機能しないため、明示的にインポートします
 import { useArrayOperations } from '~/composables/array-operations/p1/useArrayOperations'
 
 // Components を明示的にインポート
+// 注: components/array-operations/p1/ のような深い階層では自動インポートが機能しないため、明示的にインポートします
 import DataFetch from '~/components/array-operations/p1/DataFetch.vue'
 import MapExample from '~/components/array-operations/p1/MapExample.vue'
 import FilterExample from '~/components/array-operations/p1/FilterExample.vue'
@@ -86,6 +88,9 @@ import FindExample from '~/components/array-operations/p1/FindExample.vue'
 import SortExample from '~/components/array-operations/p1/SortExample.vue'
 import PaginationExample from '~/components/array-operations/p1/PaginationExample.vue'
 import CrudExample from '~/components/array-operations/p1/CrudExample.vue'
+
+// 型定義を明示的にインポート（必要に応じて使用）
+// import type { Post } from '~/types/array-operations/p1/api'
 
 // Composables を使用
 const {

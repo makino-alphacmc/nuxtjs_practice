@@ -37,7 +37,7 @@ nuxtjs_practice/
 **実務で必須の 4 つの概念:**
 
 1. **型定義の明確化** - `types/crud-operations/p1/api.ts` で `any` の使用を減らす
-2. **コンポーネントの分割** - `components/crud-operations/p1/PostListWithOperations.vue` で再利用性・保守性を向上
+2. **コンポーネントの分割** - `components/crud-operations/p1/PostListWithOperations.vue` で再利用性・保守性を向上（props で受け取る）
 3. **ロジックの分離** - `composables/crud-operations/p1/useCrudWithArrayOperations.ts` で composables を活用
 4. **明示的なインポート** - 深い階層では自動インポートに頼らず、明示的にインポート
 
@@ -321,7 +321,12 @@ import PostListWithOperations from '~/components/crud-operations/p1/PostListWith
 </script>
 ```
 
-### 4. 明示的なインポート（トラブル回避）
+### 4. 明示的なインポート（依存明確化）
+
+**目的:**
+- 自動インポート不発バグの防止
+- 読みやすさ向上
+- 依存関係の透明化
 
 Nuxt 3 では自動インポート機能がありますが、深い階層（`composables/crud-operations/p1/` など）では機能しない場合があります。トラブルを避けるため、**必要なものは明示的にインポート**することを推奨します。
 
@@ -339,6 +344,10 @@ import PostListWithOperations from '~/components/crud-operations/p1/PostListWith
 // 型定義を明示的にインポート
 import type { Post } from '~/types/crud-operations/p1/api'
 ```
+
+**注意:**
+- Nuxt 組込（$fetch 等）は auto-import OK
+- components / composables は深い階層だと auto import NG
 
 **明示的なインポートのメリット：**
 
@@ -390,7 +399,7 @@ const handleDeletePost = async (id: number) => {
 
 このセクションでは、実務で必須の 4 つの概念を実装しました：
 
-### 1. 型定義の明確化
+### 1. 型定義の明確化（types/）
 
 ```typescript
 // types/crud-operations/p1/api.ts
@@ -404,11 +413,31 @@ export interface Post {
 
 **メリット：**
 
-- `any` の使用を減らし、実行時エラーを防ぐ
-- IDE の補完機能が働く
-- チーム開発でデータ構造が明確になる
+- ✅ タイポや不整合を即検知
+- ✅ 自動補完が強くなる
+- ✅ 安全にリファクタ可能
 
-### 2. ロジックの分離（Composables）
+### 2. コンポーネント分割（UI の単一責任）
+
+```vue
+<!-- components/crud-operations/p1/PostListWithOperations.vue -->
+<template>
+	<UButton
+		@click="$emit('delete', post.id)"
+		color="red"
+	>
+		削除
+	</UButton>
+</template>
+```
+
+**メリット：**
+
+- ✅ 複数ページで再利用可能
+- ✅ 修正箇所が最小
+- ✅ 理解しやすい
+
+### 3. ロジックの分離（composables/）
 
 ```typescript
 // composables/crud-operations/p1/useCrudWithArrayOperations.ts
@@ -428,42 +457,28 @@ const deletePost = async (id: number) => {
 
 **メリット：**
 
-- コードの重複を防ぐ
-- ロジックのテストが容易になる
-- 変更が一箇所で済む
+- ✅ どのページでも同じロジックを使える
+- ✅ 保守性が圧倒的に上がる
+- ✅ UI がシンプルに保てる
 
-### 3. コンポーネントの分割
-
-```vue
-<!-- components/crud-operations/p1/PostListWithOperations.vue -->
-<template>
-	<UButton
-		@click="$emit('delete', post.id)"
-		color="red"
-	>
-		削除
-	</UButton>
-</template>
-```
-
-**メリット：**
-
-- ファイルが肥大化するのを防ぐ
-- 再利用性が向上する
-- 保守性が向上する
-
-### 4. 明示的なインポート
+### 4. 明示的なインポート（依存明確化）
 
 ```typescript
-// pages/crud-operations/p1/index.vue
+// Composables
 import { useCrudWithArrayOperations } from '~/composables/crud-operations/p1/useCrudWithArrayOperations'
+
+// Components
 import PostListWithOperations from '~/components/crud-operations/p1/PostListWithOperations.vue'
+
+// Types
+import type { Post } from '~/types/crud-operations/p1/api'
 ```
 
 **メリット：**
 
-- 自動インポートが機能しない場合でも確実に動作する
-- 依存関係が明確で、リファクタリングが安全
+- ✅ 自動インポートが機能しない場合でも確実に動作する
+- ✅ どこから来ているかが明確で、コードレビューがしやすい
+- ✅ 依存関係が明確で、リファクタリングが安全
 
 ## 配列操作との統合
 
@@ -485,18 +500,19 @@ DELETE リクエストを使うことで、以下のメリットが得られま�
 4. **ページネーションの自動調整**: 削除後にページが空になったら自動的に前のページに移動
 5. **再利用性**: Composables とコンポーネントの分割により、コードの再利用性が向上する
 
-### 実装の流れ
+### 実装の流れ（統一パターン）
 
 1. **型定義を作成**: `types/crud-operations/p1/api.ts` で型を定義
 2. **Composable を作成**: `composables/crud-operations/p1/useCrudWithArrayOperations.ts` でロジックを分離
-3. **コンポーネントを作成**: `components/crud-operations/p1/PostListWithOperations.vue` で UI を分割
-4. **メインコンポーネントで統合**: `pages/crud-operations/p1/index.vue` で全てを組み合わせる
+3. **コンポーネントを作成**: `components/crud-operations/p1/PostListWithOperations.vue` で UI を分割（props で受け取る）
+4. **明示的なインポート**: 深い階層では自動インポートに頼らず明示的にインポート
+5. **メインコンポーネントで統合**: `pages/crud-operations/p1/index.vue` で全てを組み合わせる
 
 ### 重要なポイント
 
-- **削除確認**: 必ず確認ダイアログを表示して誤削除を防ぐ
+- **削除確認**: 必ず確認ダイアログを表示して誤削除を防ぐ（実務で必須）
 - **配列操作**: `filter`で削除したデータを一覧から除外
 - **ページネーション**: 削除後にページが空になったら自動的に前のページに移動
 
-このセクションでは、DELETE リクエストの基本的な使い方と、実務で必須の 4 つの概念（型定義・Composables・コンポーネント分割・明示的なインポート）を学びました。これで CRUD 操作と配列操作を統合した実践的な実装を全て学習できました。
+このセクションでは、DELETE リクエストの基本的な使い方と、実務で必須の 4 つの概念（型定義・コンポーネント分割・ロジックの分離・明示的なインポート）を学びました。これで CRUD 操作と配列操作を統合した実践的な実装を全て学習できました。
 

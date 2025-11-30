@@ -31,21 +31,12 @@
 	</UCard>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+interface Props {
+	userPostCounts: Record<number, number>
+	hasData: boolean
+}
 
-export default defineComponent({
-	name: 'ReduceExample',
-	props: {
-		userPostCounts: {
-			type: Object as () => Record<number, number>,
-			required: true,
-		},
-		hasData: {
-			type: Boolean,
-			required: true,
-		},
-	},
-})
+defineProps<Props>()
 </script>
 
